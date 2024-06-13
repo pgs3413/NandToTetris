@@ -1,0 +1,23 @@
+/**
+    DMux8Way gate;
+    if sel = 000 then a=in
+    else if sel = 001 then b=in
+    else if sel = 010 then c=in
+    else if sel = 011 then d=in
+    else if sel = 100 then e=in
+    else if sel = 101 then f=in
+    else if sel = 110 then g=in
+    else if sel = 111 then h=in
+*/
+
+CHIP DMux8Way {
+    IN in,sel[3];
+    OUT a,b,c,d,e,f,g,h;
+
+    PARTS:
+    DMux4Way(in=in, sel=sel[0..1], a=temp1, b=temp2, c=temp3, d=temp4);
+    DMux(in=temp1, sel=sel[2], a=a, b=e);
+    DMux(in=temp2, sel=sel[2], a=b, b=f);
+    DMux(in=temp3, sel=sel[2], a=c, b=g);
+    DMux(in=temp4, sel=sel[2], a=d, b=h);
+}
