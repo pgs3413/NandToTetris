@@ -1,0 +1,13 @@
+/**
+    FullAdder chip;
+*/
+
+CHIP FullAdder {
+    IN a,b,c;
+    OUT sum,carry;
+
+    PARTS:
+    HalfAdder(a=a, b=b, sum=tempsum, carry=tempcarry1);
+    HalfAdder(a=tempsum, b=c, sum=sum, carry=tempcarry2);
+    Or(a=tempcarry1, b=tempcarry2, out=carry);
+}
