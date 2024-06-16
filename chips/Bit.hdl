@@ -1,0 +1,12 @@
+/**
+    1bit寄存器
+*/
+
+CHIP Bit {
+    IN in,load;
+    OUT out;
+
+    PARTS:
+    Mux(a=outtemp, b=in, sel=load, out=intemp);
+    DFF(in=intemp, out=outtemp, out=out);
+}

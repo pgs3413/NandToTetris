@@ -1,0 +1,22 @@
+/**
+    PC 计数器
+*/
+
+CHIP PC {
+    IN in[16],inc,load,reset;
+    OUT out[16];
+
+    PARTS:
+    And(a=load, b=inc, out=loadandinc);
+    Not(in=reset, out=notreset);
+    Not(in=load, out=notload);
+    Not(in=inc, out=notinc);
+    Or(a=notinc, b=loadandinc, out=or1);
+    And(a=notreset, b=or1, out=seltemp0);
+    And(a=notreset, b=notload, out=seltemp1);
+
+    Inc16(in=outtemp, out=outinc);
+    Mux4Way16(a=false, b=in, c=outinc, d=outtemp, sel[0]=seltemp0, sel[1]=seltemp1, out=intemp);
+
+    Register(in=intemp, load=true, out=outtemp, out=out);
+}
