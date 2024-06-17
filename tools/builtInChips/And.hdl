@@ -1,16 +1,16 @@
 // This file is part of www.nand2tetris.org
 // and the book "The Elements of Computing Systems"
 // by Nisan and Schocken, MIT Press.
-// File name: tools/builtIn/Nand.hdl
+// File name: tools/builtIn/And.hdl
 
 /**
- * Nand gate: out = a Nand b.
+ * And gate: out = 1 if {a == 1 and b == 1}, 0 otherwise  
  */
 
-CHIP Nand {
+CHIP And {
 
     IN  a, b;
     OUT out;
 
-    BUILTIN Nand;
+    BUILTIN And;
 }

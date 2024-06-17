@@ -1,0 +1,19 @@
+/**
+    Memory
+*/
+
+CHIP Memory {
+    IN in[16],load,address[15];
+    OUT out[16];
+
+    PARTS:
+    DMux(in=load, sel=address[14], a=loada, b=loadb);
+    /*使用内置版本*/
+    RAM16K(in=in, address=address[0..13], load=loada, out=outa);
+    DMux(in=load, sel=address[13], a=loadb1, b=loadb2);
+    And(a=loadb, b=loadb1, out=loads);
+    Screen(in=in, load=loads, address=address[0..12], out=outs);
+    Keyboard(out=outk);
+    Mux16(a=outs, b=outb, sel=address[13], out=outb);
+    Mux16(a=outa, b=outb, sel=address[14], out=out);
+}

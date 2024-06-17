@@ -1,16 +1,16 @@
 // This file is part of www.nand2tetris.org
 // and the book "The Elements of Computing Systems"
 // by Nisan and Schocken, MIT Press.
-// File name: tools/builtIn/Nand.hdl
+// File name: tools/builtIn/Xor.hdl
 
 /**
- * Nand gate: out = a Nand b.
+ *  Exclusive-or gate: out = !(a == b).
  */
 
-CHIP Nand {
+CHIP Xor {
 
     IN  a, b;
     OUT out;
 
-    BUILTIN Nand;
+    BUILTIN Xor;
 }
