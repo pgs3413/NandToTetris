@@ -1,0 +1,47 @@
+/**
+    CPU
+*/
+
+CHIP CPU {
+    IN inM[16],instruction[16],reset;
+    OUT outM[16],writeM,addressM[15],pc[15];
+
+    PARTS:
+
+    Mux16(a=instruction, b=ALUout, sel=instruction[15], out=Ain);
+    Not(in=instruction[15], out=noti);
+    And(a=instruction[15], b=instruction[5], out=id1);
+    Or(a=noti, b=id1, out=Aload);
+    And(a=instruction[15], b=instruction[4], out=Dload);
+    And(a=instruction[15], b=instruction[3], out=writeM);
+
+    //A register
+    Register(in=Ain, load=Aload, out=Aout, out[0..14]=addressM);
+
+    //D register
+    DRegister(in=ALUout, load=Dload, out=Dout);
+
+    Mux16(a=Aout, b=inM, sel=instruction[12], out=yin);
+
+    //ALU
+    ALU(x=Dout, y=yin, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outM, out=ALUout, zr=zrtemp, ng=ngtemp);
+
+    And(a=instruction[15], b=instruction[2], out=j1);
+    And(a=instruction[15], b=instruction[1], out=j2);
+    And(a=instruction[15], b=instruction[0], out=j3);
+
+    //load = j1 * ng + j2 * zr + j3 * notzr * notng;
+    And(a=j1, b=ngtemp, out=temp1);
+    And(a=j2, b=zrtemp, out=temp2);
+    Not(in=zrtemp, out=notzr);
+    Not(in=ngtemp, out=notng);
+    And(a=notzr, b=notng, out=j3temp);
+    And(a=j3, b=j3temp, out=temp3);
+    Or(a=temp1, b=temp2, out=temp4);
+    Or(a=temp4, b=temp3, out=PCload);
+
+    //PC
+    PC(in=Aout, reset=reset, load=PCload, inc=true, out[0..14]=pc[0..14]);
+
+
+}
