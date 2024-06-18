@@ -15,10 +15,10 @@ CHIP CPU {
     And(a=instruction[15], b=instruction[4], out=Dload);
     And(a=instruction[15], b=instruction[3], out=writeM);
 
-    //A register
-    Register(in=Ain, load=Aload, out=Aout, out[0..14]=addressM);
+    //A register buildin
+    ARegister(in=Ain, load=Aload, out=Aout, out[0..14]=addressM);
 
-    //D register
+    //D register buildin
     DRegister(in=ALUout, load=Dload, out=Dout);
 
     Mux16(a=Aout, b=inM, sel=instruction[12], out=yin);
@@ -40,7 +40,7 @@ CHIP CPU {
     Or(a=temp1, b=temp2, out=temp4);
     Or(a=temp4, b=temp3, out=PCload);
 
-    //PC
+    //PC buildin
     PC(in=Aout, reset=reset, load=PCload, inc=true, out[0..14]=pc[0..14]);
 
 
