@@ -16,10 +16,10 @@ CHIP CPU {
     And(a=instruction[15], b=instruction[3], out=writeM);
 
     //A register buildin
-    ARegister(in=Ain, load=Aload, out=Aout, out[0..14]=addressM);
+    Register(in=Ain, load=Aload, out=Aout, out[0..14]=addressM);
 
     //D register buildin
-    DRegister(in=ALUout, load=Dload, out=Dout);
+    Register(in=ALUout, load=Dload, out=Dout);
 
     Mux16(a=Aout, b=inM, sel=instruction[12], out=yin);
 

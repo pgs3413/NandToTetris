@@ -8,7 +8,6 @@ CHIP Memory {
 
     PARTS:
     DMux(in=load, sel=address[14], a=loada, b=loadb);
-    /*使用内置版本*/
     RAM16K(in=in, address=address[0..13], load=loada, out=outa);
     DMux(in=load, sel=address[13], a=loadb1, b=loadb2);
     And(a=loadb, b=loadb1, out=loads);
