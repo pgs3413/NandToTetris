@@ -28,10 +28,9 @@ public class Parser {
     }};
 
 
-    public Parser(String fileName) throws IOException {
+    public Parser(Path fileName) throws IOException {
         AtomicInteger startNumber = new AtomicInteger(1);
-        Path path = Paths.get(fileName);
-        lines = Files.readAllLines(path)
+        lines = Files.readAllLines(fileName)
                 .stream().map(String::trim)
                 .map(value -> new Line(startNumber.getAndIncrement(), value))
                 .filter(line -> line.value.length() > 0 && !line.value.startsWith("//")).collect(Collectors.toList());
@@ -41,6 +40,10 @@ public class Parser {
 
     public boolean hasMoreCommands(){
         return index < size;
+    }
+
+    public void restart(){
+        index = 0;
     }
 
     public void advance(){

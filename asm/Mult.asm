@@ -18,7 +18,7 @@ D=M
 @R2
 M=D+M
 @i
-M=1+M
+M=M + 1
 @LOOP
 0 ; JMP
 
