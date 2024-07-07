@@ -7,6 +7,7 @@ import parse.CommandType;
 import parse.Parser;
 import symbol.SymbolTable;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,6 +30,18 @@ public class Main {
         }
 
         Path sourceFilePath = Paths.get(args[0]);
+
+        String targetFileName;
+        if(args.length >= 2){
+            targetFileName = args[1];
+        }else {
+            targetFileName = sourceFilePath.getParent().toString() + "/" + sourceFilePath.getFileName().toString().split("\\.")[0] + ".hack";
+        }
+
+        Path targetFilePath = Paths.get(targetFileName);
+
+        BufferedWriter targetWriter = Files.newBufferedWriter(targetFilePath);
+
         Parser parser = new Parser(sourceFilePath);
         SymbolTable symbolTable = new SymbolTable();
 
@@ -56,12 +69,11 @@ public class Main {
             }
         }
 
-        List<String> commands = new ArrayList<>();
-
         //第二遍遍历
         parser.restart();
         int startAddress = 16;
         while (parser.hasMoreCommands()){
+            String command = null;
             parser.advance();
             CommandType commandType = parser.commandType();
             if(commandType == A_COMMAND){
@@ -78,29 +90,23 @@ public class Main {
                         System.err.println("非法的数字：" + symbol);
                         System.exit(-1);
                     }
-                    commands.add("0" + symbolTable.convert(num));
+                    command = "0" + symbolTable.convert(num);
                 }else {
                     if(!symbolTable.contains(symbol)){
                         symbolTable.addEntry(symbol, startAddress++);
                     }
-                    commands.add("0" + symbolTable.getAddress(symbol));
+                    command = "0" + symbolTable.getAddress(symbol);
                 }
             }else if (commandType == C_COMMAND){
-                commands.add("111" + Coder.comp(parser.comp()) + Coder.dest(parser.destA(), parser.destD(), parser.destM()) + Coder.jump(parser.jump()));
+                command = "111" + Coder.comp(parser.comp()) + Coder.dest(parser.destA(), parser.destD(), parser.destM()) + Coder.jump(parser.jump());
+            }else{
+                continue;
             }
+            targetWriter.append(command);
+            targetWriter.newLine();
         }
 
-        //保存二进制指令
-        String targetFileName;
-        if(args.length >= 2){
-            targetFileName = args[1];
-        }else {
-            targetFileName = sourceFilePath.getParent().toString() + "/" + sourceFilePath.getFileName().toString().split("\\.")[0] + ".hack";
-        }
-
-        Path targetFilePath = Paths.get(targetFileName);
-        Files.write(targetFilePath, commands);
-
+        targetWriter.close();
         System.out.println("汇编成功！");
 
     }
