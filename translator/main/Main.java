@@ -76,6 +76,7 @@ public class Main {
                     targetWriter.newLine();
                 }
             }
+            Coder.STATIC_CNT++;
         }
 
         System.out.println("翻译成功！");
