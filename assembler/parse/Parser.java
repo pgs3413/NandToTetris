@@ -13,7 +13,7 @@ import static parse.CommandType.*;
 /**
  * @Author: pangs
  * @Date: 2024/6/21
- * @description: Assembler Parser
+ * @description: Assembler parse.Parser
  */
 public class Parser {
 
