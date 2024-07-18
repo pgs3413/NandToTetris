@@ -56,7 +56,13 @@ public class Parser {
             line.commandType = "push".equals(command) ? C_PUSH : C_POP;
             line.arg1 = segment;
             line.arg2 = toNumber(index, line.number);
-        }else {
+        } else if("label".equals(command) || "goto".equals(command) || "if-goto".equals(command)){
+            if(tokens.size() != 2) exit(line.number, "格式应为 label/goto/if-goto labelName");
+            String labelName = tokens.get(1);
+            if(!checkName(labelName)) exit(line.number, "labelName非法: " + labelName);
+            line.commandType = "label".equals(command) ? C_LABEL : "goto".equals(command) ? C_GOTO : C_IF;
+            line.arg1 = labelName;
+        } else {
             exit(line.number, "非法的命令：" + command);
         }
         this.line = line;
@@ -82,7 +88,7 @@ public class Parser {
         for(int i = 0; i < length; i++){
             char c = line.charAt(i);
             if(c == '/' && i + 1 < length && line.charAt(i + 1) == '/') break;
-            if(c == ' '){
+            if(c == ' ' || c == '\t'){
                 if(!"".equals(token.toString())){
                     tokens.add(token.toString());
                     token = new StringBuilder();
@@ -102,6 +108,16 @@ public class Parser {
             exit(lineNumber, "非法的数字 " + number);
         }
         return 0;
+    }
+
+    private boolean checkName(String name){
+        char start = name.charAt(0);
+        if('0' <= start && start <= '9') return false;
+        for(int i = 0; i < name.length(); i++){
+            char c = name.charAt(i);
+            if(!( '0' <= c && c <= '9' || 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z' || '_' == c || '.' == c || ':' == c)) return false;
+        }
+        return true;
     }
 
     private void exit(int number, String msg){

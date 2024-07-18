@@ -198,5 +198,18 @@ public class Coder {
        return null;
     }
 
+    public static List<String> label(String labelName, String functionName){
+        return of("(" + functionName + "$" + labelName + ")");
+    }
+
+    public static List<String> _goto(String labelName, String functionName){
+        return of("@" + functionName + "$" + labelName, "0;JMP");
+    }
+
+    public static List<String> if_goto(String labelName, String functionName){
+        return of(popD(), of("@" + functionName + "$" + labelName, "D;JNE"));
+    }
+
+
 
 }

@@ -55,6 +55,7 @@ public class Main {
 
         for(Path path : sourcePaths){
             Parser parser = new Parser(path);
+            String functionName = "f";
             while (parser.hasMoreCommands()){
                 parser.advance();
                 CommandType commandType = parser.commandType();
@@ -67,7 +68,13 @@ public class Main {
                     vms = Coder.pushPop(C_PUSH, arg1, arg2);
                 }else if(C_POP == commandType){
                     vms = Coder.pushPop(C_POP, arg1, arg2);
-                }else {
+                }else if(C_LABEL == commandType){
+                    vms = Coder.label(arg1, functionName);
+                }else if(C_GOTO == commandType){
+                    vms = Coder._goto(arg1, functionName);
+                }else if(C_IF == commandType){
+                    vms = Coder.if_goto(arg1, functionName);
+                } else {
                     exit("未知类型：" + commandType.toString());
                 }
                 assert vms != null;
