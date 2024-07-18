@@ -210,6 +210,59 @@ public class Coder {
         return of(popD(), of("@" + functionName + "$" + labelName, "D;JNE"));
     }
 
+    private static int ret_index = 0;
 
+    public static List<String> call(String functionName, int m){
+        String returnAddress = "return_address" + ret_index;
+        ret_index++;
+        // push return-address
+        List<String> list1 = of(of("@" + returnAddress, "D=A"), pushD());
+        //push LCL ARG THIS THAT
+        List<String> list2 = of(push("LCL"), push("ARG"), push("THIS"), push("THAT"));
+        //ARG = SP - m - 5
+        List<String> list3 = of("@" + m, "D=A", "@5", "D=D+A", "@SP", "D=M-D", "@ARG", "M=D");
+        //LCL = SP
+        List<String> list4 = of("@SP", "D=M", "@LCL", "M=D");
+        //goto f
+        List<String> list5 = of("@" + functionName, "0;JMP");
+        //(return-address)
+        List<String> list6 = of("(" + returnAddress + ")");
+
+        return of(list1, list2, list3, list4, list5, list6);
+    }
+
+    public static List<String> function(String functionName, int n){
+        //(f)
+        List<String> list1 = of("(" + functionName + ")");
+        //repeat n times: push 0
+        List<String> list2 = new ArrayList<>();
+        list2.add("D=0");
+        for(int i = 0; i < n; i++) list2.addAll(pushD());
+
+        return of(list1, list2);
+    }
+
+    public static List<String> _return(){
+        // R13 = LCL
+        List<String> list1 = of("@LCL", "D=M", "@R13", "M=D");
+        // R14 = *(R13 - 5) = RET
+        List<String> list2 = of("@5", "A=D-A", "D=M", "@R14", "M=D");
+        //*ARG = pop()
+        List<String> list3 = of(popD(), of("@ARG", "A=M", "M=D"));
+        //SP = ARG + 1
+        List<String> list4 = of("@ARG", "D=M+1", "@SP", "M=D");
+        //THAT = *(R13 - 1)
+        List<String> list5 = of("@R13", "A=M-1", "D=M", "@THAT", "M=D");
+        //THIS = *(R13 - 2)
+        List<String> list6 = of("@2", "D=A", "@R13", "A=M-D", "D=M", "@THIS", "M=D");
+        //ARG = *(R13 - 3)
+        List<String> list7 = of("@3", "D=A", "@R13", "A=M-D", "D=M", "@ARG", "M=D");
+        //LCL = *(R13 - 4)
+        List<String> list8 = of("@4", "D=A", "@R13", "A=M-D", "D=M", "@LCL", "M=D");
+        //goto RET
+        List<String> list9 = of("@R14", "A=M", "0;JMP");
+
+        return of(list1, list2, list3, list4, list5, list6, list7, list8, list9);
+    }
 
 }

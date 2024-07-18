@@ -74,6 +74,13 @@ public class Main {
                     vms = Coder._goto(arg1, functionName);
                 }else if(C_IF == commandType){
                     vms = Coder.if_goto(arg1, functionName);
+                }else if(C_FUNCTION == commandType){
+                    functionName = arg1;
+                    vms = Coder.function(arg1, arg2);
+                }else if(C_RETURN == commandType){
+                    vms = Coder._return();
+                }else if(C_CALL == commandType){
+                    vms = Coder.call(arg1, arg2);
                 } else {
                     exit("未知类型：" + commandType.toString());
                 }

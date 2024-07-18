@@ -62,6 +62,17 @@ public class Parser {
             if(!checkName(labelName)) exit(line.number, "labelName非法: " + labelName);
             line.commandType = "label".equals(command) ? C_LABEL : "goto".equals(command) ? C_GOTO : C_IF;
             line.arg1 = labelName;
+        } else if("function".equals(command) || "call".equals(command)){
+            if(tokens.size() != 3) exit(line.number, "格式应为 function/call functionName n");
+            String functionName = tokens.get(1);
+            String argsCnt = tokens.get(2);
+            if(!checkName(functionName)) exit(line.number, "functionName非法: " + functionName);
+            line.commandType = "function".equals(command) ? C_FUNCTION : C_CALL;
+            line.arg1 = functionName;
+            line.arg2 = toNumber(argsCnt, line.number);
+        }else if("return".equals(command)){
+            if(tokens.size() != 1) exit(line.number, "格式应为 return");
+            line.commandType = C_RETURN;
         } else {
             exit(line.number, "非法的命令：" + command);
         }
