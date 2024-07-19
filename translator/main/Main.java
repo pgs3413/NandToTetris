@@ -40,7 +40,7 @@ public class Main {
            }
             assert files != null;
             for(File f : files) sourcePaths.add(f.toPath());
-            targetPath = Paths.get(args[0], "out.asm");
+            targetPath = Paths.get(args[0], sourceFile.getName()  + ".asm");
         }else if(sourceFile.isFile()){
             sourcePaths.add(sourcePath);
             targetPath = Paths.get(sourceFile.getParent() + "/" + sourceFile.getName().split("\\.")[0] + ".asm");
@@ -52,6 +52,11 @@ public class Main {
         BufferedWriter targetWriter = Files.newBufferedWriter(targetPath);
 
         //VM初始化
+        List<String> init = Coder.init();
+        for(String s : init){
+            targetWriter.append(s);
+            targetWriter.newLine();
+        }
 
         for(Path path : sourcePaths){
             Parser parser = new Parser(path);

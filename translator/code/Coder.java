@@ -265,4 +265,13 @@ public class Coder {
         return of(list1, list2, list3, list4, list5, list6, list7, list8, list9);
     }
 
+    public static List<String> init(){
+        //SP = 256
+        List<String> list1 = of("@256", "D=A", "@SP", "M=D");
+        //goto Sys.init
+        List<String> list2 = call("Sys.init", 0);
+
+        return of(list1, list2);
+    }
+
 }
