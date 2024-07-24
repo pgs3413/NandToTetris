@@ -1,5 +1,6 @@
 package xml;
 
+import parse.Parser;
 import token.Scanner;
 
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import token.Token;
+import tree.Tree;
 import xml.Node.*;
 
 /**
@@ -36,6 +38,18 @@ public class XmlUtils {
         ListNode root = ListNode.of("tokens");
         root.setValues(nodeList);
         String xml = root.toString(0);
+
+        Files.write(target, xml.getBytes(StandardCharsets.UTF_8));
+
+    }
+
+    public static void parse(Path source, Path target) throws IOException {
+
+        Parser p = new Parser(source);
+
+        Tree tree = p.parse();
+
+        String xml = tree.toXml().toString(0);
 
         Files.write(target, xml.getBytes(StandardCharsets.UTF_8));
 

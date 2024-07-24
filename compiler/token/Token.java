@@ -49,11 +49,11 @@ public enum Token {
     EQ("=", Type.S),
     NOT("~", Type.S),
 
-    INTCONSTANT(Type.IC),
-    STRINGCONSTANT(Type.SC),
-    IDENTIFIER(Type.I),
+    INTCONSTANT("整型常量",Type.IC),
+    STRINGCONSTANT("字符串常量",Type.SC),
+    IDENTIFIER("非关键字标识符" ,Type.I),
 
-    EOF,
+    EOF("文件结束"),
     ;
 
     public final String name;
@@ -73,8 +73,8 @@ public enum Token {
         this(null, null);
     }
 
-    Token(Type type){
-        this(null, type);
+    Token(String name){
+        this(name, null);
     }
 
     Token(String name, Type type){

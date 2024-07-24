@@ -17,10 +17,10 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        Path source = Paths.get("./jack/Square/SquareGame.jack");
-        Path target = Paths.get("./jack/Square/SquareGameT.xml");
+        Path source = Paths.get("./jack/average/Main.jack");
+        Path target = Paths.get("./jack/average/Main.xml");
 
-        XmlUtils.tokenizing(source, target);
+        XmlUtils.parse(source, target);
 
     }
 }

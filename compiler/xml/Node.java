@@ -19,12 +19,21 @@ public abstract class Node {
         public ListNode(String name){
             super(name);
         }
+
+        public ListNode(String name, List<Node> values){
+            super(name);
+            this.values = values;
+        }
         public void setValues(List<Node> values){
             this.values = values;
         }
 
         public static ListNode of(String name){
             return new ListNode(name);
+        }
+
+        public static ListNode of(String name, List<Node> values){
+            return new ListNode(name, values);
         }
 
         @Override

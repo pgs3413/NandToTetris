@@ -44,9 +44,17 @@ public class Scanner {
         return name;
     }
 
+    public int line(){
+        return line;
+    }
+
+    public int linePos(){
+        return linePos;
+    }
+
     private void scanChar(){
         ch = buf[++pos];
-        if(ch == '\n' || ch == '\r'){
+        if(ch == '\n'){
             line++;
             linePos = 0;
         }else {
@@ -61,7 +69,7 @@ public class Scanner {
 
             if(ch == EOI){
                 token = EOF;
-                name = "EOF";
+                name = "";
                 return;
             }
 
