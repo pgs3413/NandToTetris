@@ -5,7 +5,7 @@
 class Math {
 
     static Array twoToThe;
-    static int l;
+    static Array divideStack;
 
     /** Initializes the library. */
     function void init() {
@@ -27,6 +27,8 @@ class Math {
         let twoToThe[13] = 8192;
         let twoToThe[14] = 16384;
         let twoToThe[15] = 32767 + 1;
+
+        let divideStack = Array.new(16);
 
         return;
 
@@ -128,23 +130,37 @@ class Math {
 
     function int divide_positive(int x, int y){
 
-        var int q;
+        var int q, l, result, rest;
 
         if(y > x){
             return 0;
         }
 
+        let q = 0;
         let l = y;
-        let q = Math.divide_positive(x, Math.multiply(y, 2));
-        if(q = 0){
-            return 1;
+
+        while((l > 0) & (~(l > x))){
+            let divideStack[q] = l;
+            let l = l + l;
+            let q = q + 1;
         }
-        if((x - l) < y){
-            return Math.multiply(q, 2);
-        } else {
-            let l = l + y;
-            return Math.multiply(q, 2) + 1;
+
+        let result = 1;
+        let q = q - 1;
+        let l = divideStack[q];
+        let q = q - 1;
+
+        while(q > (-1)){
+            let result = result + result;
+            let rest = x - l;
+            if(~(rest < divideStack[q])){
+                let result = result + 1;
+                let l = l + divideStack[q];
+            }
+            let q = q - 1;
         }
+
+        return result;
 
     }
 
@@ -179,6 +195,12 @@ class Math {
         }
 
         return y;
+    }
+
+    function int mod(int x, int y){
+        var int z;
+        let z = Math.divide(x, y);
+        return x - Math.multiply(y, z);
     }
 
     /** Returns the greater number. */
