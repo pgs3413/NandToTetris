@@ -153,17 +153,27 @@ class Math {
 
         var int i, t, tt, y;
 
+        if(x = 0){
+            return 0;
+        }
+
+        if(x = 1){
+            return 1;
+        }
+
         let i = 7;
         let y = 0;
 
         while(~(i < 0)){
             let t = y + twoToThe[i];
-            let tt = Math.multiply(t, t);
-            if(tt = x){
-                return t;
-            }
-            if((tt > 0) & (tt < x)){
-                let y = t;
+            if(t < x){
+                let tt = Math.multiply(t, t);
+                if(tt = x){
+                    return t;
+                }
+                if((tt > 0) & (tt < x)){
+                    let y = t;
+                }
             }
             let i = i - 1;
         }
