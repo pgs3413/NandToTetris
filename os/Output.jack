@@ -28,7 +28,6 @@ class Output {
 
     // Initializes the character map array
     function void initMap() {
-        var int i;
 
         let charMaps = Array.new(127);
 
@@ -176,6 +175,34 @@ class Output {
         return charMaps[c];
     }
 
+    function void draw(int i, int j, char c){
+        var Array map;
+        var int a, b, m, x, y, index, o;
+
+        let a = 0;
+        let map = Output.getMap(c);
+
+        while(a < 11){
+            let m = map[a];
+            let x = (i * 11) + a;
+            let y = j / 2;
+            let index = (x * 32) + y;
+            let o = base[index];
+            let b = Math.mod(j, 2);
+            if(b = 0){
+                let o = o & (-256);
+                let o = o + m;
+            }else {
+                let o = o & 255;
+                let o = o + (m * 256);
+            }
+            let base[index] = o;
+            let a = a + 1;
+        }
+
+        return;
+    }
+
     /** Moves the cursor to the j-th column of the i-th row,
      *  and erases the character displayed there. */
     function void moveCursor(int i, int j) {
@@ -260,34 +287,6 @@ class Output {
             let column = 0;
         }
         do Output.draw(line, column, 32);
-        return;
-    }
-
-    function void draw(int i, int j, char c){
-        var Array map;
-        var int a, b, m, x, y, index, o;
-
-        let a = 0;
-        let map = Output.getMap(c);
-
-        while(a < 11){
-            let m = map[a];
-            let x = (i * 11) + a;
-            let y = j / 2;
-            let index = (x * 32) + y;
-            let o = base[index];
-            let b = Math.mod(j, 2);
-            if(b = 0){
-                let o = o & (-256);
-                let o = o + m;
-            }else {
-                let o = o & 255；
-                let o = o + (m * 256);
-            }
-            let base[index] = o;
-            let a = a + 1;
-        }
-
         return;
     }
 }
