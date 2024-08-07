@@ -95,7 +95,10 @@ class Keyboard {
      */
     function int readInt(String message) {
         var String s;
+        var int i;
         let s = Keyboard.readLine(message);
-        return s.intValue();
+        let i = s.intValue();
+        do s.dispose();
+        return i;
     }
 }
