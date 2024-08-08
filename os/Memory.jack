@@ -5,6 +5,7 @@
  */
 class Memory {
 
+    /* heap: 2048 ~ 16383 */
     static Array free;
 
     /** Initializes the class. */
