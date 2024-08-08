@@ -5,8 +5,14 @@
  */
 class Memory {
 
+    static Array free;
+
     /** Initializes the class. */
     function void init() {
+        let free = 2048;
+        let free[0] = 14000;
+        let free[1] = 0;
+        return;
     }
 
     /** Returns the RAM value at the given address. */
@@ -27,10 +33,66 @@ class Memory {
     /** Finds an available RAM block of the given size and returns
      *  a reference to its base address. */
     function int alloc(int size) {
+        var Array temp, last, temp2;
+        if((size < 0) | (size = 0)){
+            return 24577;
+        }
+        if(size < 10){
+            let size = 10;
+        }
+        let temp = free;
+        while(temp > 0){
+            if(temp[0] > size){ // block size fit
+
+                if(temp[0] < (size + 12)){ // all block
+
+                    if(temp = free){ // the first block
+                        let free = temp[1];
+                    }else { // not the first block
+                        let last[1] = temp[1];
+                    }
+
+                    return temp + 1;
+
+                }else { //the partial block
+
+                    if(temp = free){ // the first block
+                        let free = temp + (size + 1);
+                        let free[0] = temp[0] - (size + 1);
+                        let free[1] = temp[1];
+                    }else { // not the first block
+                        let last[1] = temp + (size + 1);
+                        let temp2 = last[1];
+                        let temp2[0] = temp[0] - (size + 1);
+                        let temp2[1] = temp[1];
+                    }
+
+                    let temp[0] = size + 1;
+                    return temp + 1;
+
+                }
+
+            }else { // next block
+                let last = temp;
+                let temp = temp[1];
+            }
+        }
+        return 24577;
     }
 
     /** De-allocates the given object (cast as an array) by making
      *  it available for future allocations. */
     function void deAlloc(Array o) {
+        var Array temp;
+        if(o < 2048){
+            return;
+        }
+        if(o > (2048 + 13909)){
+            return;
+        }
+        let temp = o - 1;
+        let temp[1] = free;
+        let free = temp;
+        return;
     }
 }
