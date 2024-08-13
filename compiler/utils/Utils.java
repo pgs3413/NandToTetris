@@ -25,8 +25,8 @@ public class Utils {
         return true;
     }
 
-    public static void exit(int line, int linePos, String msg){
-        System.err.println("第 " + line + " 行，第 " + linePos + " 列发生错误：" + msg);
+    public static void exit(String fileName, int line, int linePos, String msg){
+        System.err.println(fileName + " 第 " + line + " 行，第 " + linePos + " 列发生错误：" + msg);
         System.exit(-1);
     }
 

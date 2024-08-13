@@ -27,13 +27,26 @@ public class Scanner {
     private Token token;
     private String name;
 
+    private final String fileName;
+    private final String className;
+
     public Scanner(Path source) throws IOException {
         byte[] bytes = Files.readAllBytes(source);
         buf = new char[bytes.length + 1];
         //不支持非ASCII码
         for(int i = 0; i < bytes.length; i++) buf[i] = (char) bytes[i];
         buf[bytes.length] = EOI;
+        fileName = source.getFileName().toString();
+        className = fileName.split("\\.")[0];
         scanChar();
+    }
+
+    public String fileName(){
+        return fileName;
+    }
+
+    public String className(){
+        return className;
     }
 
     public Token token(){
@@ -115,7 +128,7 @@ public class Scanner {
                     scanChar();
                 }
                 String identifier = sb.toString();
-                if(!checkIdentifier(identifier)) exit(line, linePos - identifier.length(), "非法的标识符：" + identifier);
+                if(!checkIdentifier(identifier)) exit(fileName, line, linePos - identifier.length(), "非法的标识符：" + identifier);
                 token = KEYWORD_MAP.get(identifier);
                 if (token == null) {
                     token = IDENTIFIER;
@@ -133,7 +146,7 @@ public class Scanner {
                     scanChar();
                 }
                 String number = sb.toString();
-                if(!checkNumber(number)) exit(line, linePos - number.length(), "非法的数字：" + number);
+                if(!checkNumber(number)) exit(fileName, line, linePos - number.length(), "非法的数字：" + number);
                 token = INTCONSTANT;
                 name = number;
                 return;
@@ -146,14 +159,14 @@ public class Scanner {
                     sb.append(ch);
                     scanChar();
                 }
-                if(ch == EOI || ch == '\n' || ch == '\r') exit(line, linePos, "字符串常量此处缺少\"");
+                if(ch == EOI || ch == '\n' || ch == '\r') exit(fileName, line, linePos, "字符串常量此处缺少\"");
                 token = STRINGCONSTANT;
                 name = sb.toString();
                 scanChar();
                 return;
             }
 
-            exit(line, linePos, "未知符号：" + ch);
+            exit(fileName, line, linePos, "未知符号：" + ch);
 
         }
 

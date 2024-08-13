@@ -35,6 +35,9 @@ public class Parser {
     public Tree parse(){
         accept(CLASS);
         String className = accept(IDENTIFIER);
+        if(!s.className().equals(className)){
+            Utils.exit(s.fileName(), s.line(), s.linePos() - s.name().length(), "文件名与类名不一致");
+        }
         accept(LBRACE);
         List<VarDecl> varDecls = parseClassVar();
         List<SubroutineDecl> subroutineDecls = parseSubroutines();
@@ -328,7 +331,7 @@ public class Parser {
     }
 
     void expectedError(List<Token> tokens){
-        Utils.exit(s.line(), s.linePos() - s.name().length(), "expected " +
+        Utils.exit(s.fileName(), s.line(), s.linePos() - s.name().length(), "expected " +
                 tokens.stream().map(token -> token.name).collect(Collectors.joining("|"))
                 );
     }
