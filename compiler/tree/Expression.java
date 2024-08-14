@@ -33,6 +33,11 @@ public abstract class Expression implements Tree {
         }
 
         @Override
+        public void accept(Visitor v) {
+            v.visitIntegerConstant(this);
+        }
+
+        @Override
         List<Node> toNodeList() {
             return Collections.singletonList(Node.ValueNode.of("integerConstant", value.toString()));
         }
@@ -43,6 +48,11 @@ public abstract class Expression implements Tree {
 
         public StringConstant(String value) {
             this.value = value;
+        }
+
+        @Override
+        public void accept(Visitor v) {
+            v.visitStringConstant(this);
         }
 
         @Override
@@ -60,6 +70,11 @@ public abstract class Expression implements Tree {
         }
 
         @Override
+        public void accept(Visitor v) {
+            v.visitKeyWordConstant(this);
+        }
+
+        @Override
         List<Node> toNodeList() {
             return Collections.singletonList(Node.ValueNode.of("keyword", value.name));
         }
@@ -70,6 +85,11 @@ public abstract class Expression implements Tree {
 
         public Identifier(String name) {
             this.name = name;
+        }
+
+        @Override
+        public void accept(Visitor v) {
+            v.visitIdentifier(this);
         }
 
         @Override
@@ -123,6 +143,12 @@ public abstract class Expression implements Tree {
             this.subroutineName = subroutineName;
             this.args = args;
         }
+
+        @Override
+        public void accept(Visitor v) {
+            v.visitSubroutineCall(this);
+        }
+
         public List<Node> toNodeList(){
             List<Node> nodeList = new ArrayList<>(subroutineName.toNodeList());
             nodeList.add(Node.ValueNode.of("symbol", "("));
@@ -149,6 +175,10 @@ public abstract class Expression implements Tree {
             this.expr = expr;
         }
 
+        @Override
+        public void accept(Visitor v) {
+            v.visitParens(this);
+        }
 
         @Override
         List<Node> toNodeList() {
@@ -170,6 +200,11 @@ public abstract class Expression implements Tree {
         }
 
         @Override
+        public void accept(Visitor v) {
+            v.visitUnary(this);
+        }
+
+        @Override
         List<Node> toNodeList() {
             List<Node> nodeList = new ArrayList<>();
             nodeList.add(Node.ValueNode.of("symbol", op.name));
@@ -187,6 +222,11 @@ public abstract class Expression implements Tree {
             this.op = op;
             this.term1 = term1;
             this.term2 = term2;
+        }
+
+        @Override
+        public void accept(Visitor v) {
+            v.visitBinary(this);
         }
 
         @Override

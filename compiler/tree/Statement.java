@@ -23,6 +23,11 @@ public abstract class Statement implements Tree{
         }
 
         @Override
+        public void accept(Visitor v) {
+            v.visitLetStatement(this);
+        }
+
+        @Override
         public Node toXml() {
             List<Node> nodeList = new ArrayList<>();
             nodeList.add(Node.ValueNode.of("keyword", "let"));
@@ -43,6 +48,11 @@ public abstract class Statement implements Tree{
             this.condition = condition;
             this.thenPart = thenPart;
             this.elsePart = elsePart;
+        }
+
+        @Override
+        public void accept(Visitor v) {
+            v.visitIfStatement(this);
         }
 
         @Override
@@ -81,6 +91,11 @@ public abstract class Statement implements Tree{
         }
 
         @Override
+        public void accept(Visitor v) {
+            v.visitWhileStatement(this);
+        }
+
+        @Override
         public Node toXml() {
             List<Node> nodeList = new ArrayList<>();
             nodeList.add(Node.ValueNode.of("keyword", "while"));
@@ -104,6 +119,11 @@ public abstract class Statement implements Tree{
         }
 
         @Override
+        public void accept(Visitor v) {
+            v.visitDoStatement(this);
+        }
+
+        @Override
         public Node toXml() {
             List<Node> nodeList = new ArrayList<>();
             nodeList.add(Node.ValueNode.of("keyword", "do"));
@@ -118,6 +138,11 @@ public abstract class Statement implements Tree{
 
         public ReturnStatement(Expression value) {
             this.value = value;
+        }
+
+        @Override
+        public void accept(Visitor v) {
+            v.visitReturnStatement(this);
         }
 
         @Override

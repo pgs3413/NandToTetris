@@ -25,24 +25,24 @@ public class TreeMaker {
         return new ParameterDecl(typeDecl, parameterName);
     }
 
-    public static TypeDecl.CharType CharType(){
-        return new TypeDecl.CharType();
+    public static TypeDecl CharType(){
+        return TypeDecl.charType;
     }
 
-    public static TypeDecl.IntType IntType(){
-        return new TypeDecl.IntType();
+    public static TypeDecl IntType(){
+        return  TypeDecl.intType;
     }
 
-    public static TypeDecl.BoolType BoolType(){
-        return new TypeDecl.BoolType();
+    public static TypeDecl BoolType(){
+        return TypeDecl.boolType;
     }
 
-    public static TypeDecl.VoidType VoidType(){
-        return new TypeDecl.VoidType();
+    public static TypeDecl VoidType(){
+        return TypeDecl.voidType;
     }
 
-    public static TypeDecl.ClassType ClassType(String className){
-        return new TypeDecl.ClassType(className);
+    public static TypeDecl ClassType(String className){
+        return new TypeDecl(className, TypeKind.CLASS);
     }
 
     public static Statement.LetStatement LetStatement(Expression.Identifier varName, Expression init) {

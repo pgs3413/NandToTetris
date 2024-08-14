@@ -29,6 +29,11 @@ public class SubroutineDecl implements Tree{
     }
 
     @Override
+    public void accept(Visitor v) {
+        v.visitSubroutineDecl(this);
+    }
+
+    @Override
     public Node toXml() {
 
         List<Node> nodeList = new ArrayList<>();

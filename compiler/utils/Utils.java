@@ -30,4 +30,9 @@ public class Utils {
         System.exit(-1);
     }
 
+    public static void exit(String msg){
+        System.err.println(msg);
+        System.exit(-1);
+    }
+
 }

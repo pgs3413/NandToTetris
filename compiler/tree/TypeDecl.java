@@ -7,44 +7,36 @@ import xml.Node;
  * @Date: 2024/7/23
  * @description: type decl
  */
-public abstract class TypeDecl implements Tree{
+public class TypeDecl implements Tree{
 
-    public static class IntType extends TypeDecl{
-        @Override
-        public Node toXml() {
-            return Node.ValueNode.of("keyword", "int");
-        }
+    public static TypeDecl intType = new TypeDecl(TypeKind.INT);
+    public static TypeDecl charType = new TypeDecl(TypeKind.CHAR);
+    public static TypeDecl boolType = new TypeDecl(TypeKind.BOOL);
+    public static TypeDecl voidType = new TypeDecl(TypeKind.VOID);
+
+    public String name;
+    public TypeKind typeKind;
+
+    public TypeDecl(String name, TypeKind typeKind){
+        this.name = name;
+        this.typeKind = typeKind;
     }
 
-    public static class CharType extends  TypeDecl{
-        @Override
-        public Node toXml() {
-            return Node.ValueNode.of("keyword", "char");
-        }
+    public TypeDecl(TypeKind typeKind){
+        this.typeKind = typeKind;
+        this.name = typeKind.name;
     }
 
-    public static class BoolType extends TypeDecl{
-        @Override
-        public Node toXml() {
-            return Node.ValueNode.of("keyword", "boolean");
-        }
+    @Override
+    public void accept(Visitor v) {
+        v.visitTypeDecl(this);
     }
-
-    public static class VoidType extends TypeDecl{
-        @Override
-        public Node toXml() {
-            return Node.ValueNode.of("keyword", "void");
+    @Override
+    public Node toXml() {
+        if(typeKind != TypeKind.CLASS){
+            return Node.ValueNode.of("keyword", name);
         }
-    }
-
-    public static class ClassType extends TypeDecl{
-        public String className;
-        public ClassType(String className) {
-            this.className = className;
-        }
-        public Node toXml() {
-            return Node.ValueNode.of("identifier", className);
-        }
+        return Node.ValueNode.of("identifier", name);
     }
 
 }

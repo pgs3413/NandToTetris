@@ -43,7 +43,9 @@ public class Parser {
         List<SubroutineDecl> subroutineDecls = parseSubroutines();
         accept(RBRACE);
         accept(EOF);
-        return ClassDecl(className, varDecls, subroutineDecls);
+        ClassDecl classDecl = ClassDecl(className, varDecls, subroutineDecls);
+        classDecl.fileName = s.fileName();
+        return classDecl;
     }
 
     TypeDecl parseType(List<Token> tokens){

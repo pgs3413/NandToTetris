@@ -23,6 +23,11 @@ public class VarDecl implements Tree{
     }
 
     @Override
+    public void accept(Visitor v) {
+        v.visitVarDecl(this);
+    }
+
+    @Override
     public Node toXml() {
         List<Node> nodeList = new ArrayList<>();
         nodeList.add(Node.ValueNode.of("keyword", varType.name));

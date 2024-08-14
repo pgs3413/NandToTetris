@@ -17,6 +17,10 @@ public class ParameterDecl implements Tree {
         this.parameterName = parameterName;
     }
 
+    @Override
+    public void accept(Visitor v) {
+        v.visitParameterDecl(this);
+    }
 
     @Override
     public Node toXml() {
