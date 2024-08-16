@@ -12,12 +12,18 @@ public class Type {
     public static Type intType = new Type(TypeKind.INT);
     public static Type charType = new Type(TypeKind.CHAR);
     public static Type boolType = new Type(TypeKind.BOOL);
+    public static Type voidType = new Type(TypeKind.VOID);
 
     Symbol sym;
     TypeKind typeKind;
 
     public Type(TypeKind typeKind){
         this.typeKind = typeKind;
+    }
+
+    public Type(TypeKind typeKind, Symbol symbol){
+        this.typeKind = typeKind;
+        this.sym = symbol;
     }
 }
 

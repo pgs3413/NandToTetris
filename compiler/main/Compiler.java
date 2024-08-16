@@ -1,8 +1,7 @@
 package main;
 
 import parse.Parser;
-import sym.Enter;
-import sym.Scope;
+import sym.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -23,7 +22,7 @@ public class Compiler {
 
     public void compile() throws IOException {
 
-        Scope rootScope = new Scope(null);
+        Scope rootScope = new Scope(null, null);
 
         //符号收集第一阶段
         Enter enter = new Enter(rootScope);
@@ -33,6 +32,11 @@ public class Compiler {
         }
 
         //符号收集第二阶段
+        MemberEnter memberEnter = new MemberEnter(rootScope);
+        for(Symbol symbol: rootScope.table.values()){
+            memberEnter.memberEnter((ClassSymbol) symbol);
+        }
+
 
 
     }

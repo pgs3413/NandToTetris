@@ -31,11 +31,9 @@ public class Enter extends Visitor {
        }
        ClassSymbol classSymbol = new ClassSymbol();
        classSymbol.name = that.className;
-       classSymbol.scope = new Scope(scope);
+       classSymbol.scope = new Scope(scope, classSymbol);
        classSymbol.tree = that;
-       Type type = new Type(TypeKind.CLASS);
-       type.sym = classSymbol;
-       classSymbol.type = type;
+       classSymbol.type = new Type(TypeKind.CLASS, classSymbol);
        scope.table.put(that.className, classSymbol);
     }
 }

@@ -10,12 +10,14 @@ import java.util.Map;
  */
 public class Scope {
 
-    Map<String, Symbol> table;
-    Scope next;
+    public Map<String, Symbol> table;
+    public Scope next;
+    public Symbol sym;
 
-    public Scope(Scope next){
+    public Scope(Scope next, Symbol symbol){
         table = new HashMap<>();
         this.next = next;
+        this.sym = symbol;
     }
 
 }
