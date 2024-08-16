@@ -1,5 +1,6 @@
 package main;
 
+import code.Coder;
 import parse.Parser;
 import sym.*;
 
@@ -15,9 +16,11 @@ import java.util.List;
 public class Compiler {
 
     List<Path> jackFiles;
+    Path targetPath;
 
-    public Compiler(List<Path> jackFiles){
+    public Compiler(List<Path> jackFiles, Path targetPath){
         this.jackFiles = jackFiles;
+        this.targetPath = targetPath;
     }
 
     public void compile() throws IOException {
@@ -37,7 +40,11 @@ public class Compiler {
             memberEnter.memberEnter((ClassSymbol) symbol);
         }
 
-
+        //VM code generate
+        Coder coder = new Coder(targetPath, rootScope);
+        for(Symbol symbol: rootScope.table.values()){
+            coder.gen((ClassSymbol) symbol);
+        }
 
     }
 

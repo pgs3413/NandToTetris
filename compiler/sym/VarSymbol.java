@@ -9,8 +9,8 @@ import tree.VarType;
  */
 public class VarSymbol extends Symbol{
 
-    VarType varType;
-    Type type;
-    int index;
+    public VarType varType;
+    public Type type;
+    public int index;
 
 }

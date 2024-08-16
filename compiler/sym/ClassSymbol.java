@@ -9,7 +9,7 @@ import tree.ClassDecl;
  */
 public class ClassSymbol extends Symbol{
 
-    Scope scope;
-    ClassDecl tree;
-    Type type;
+    public Scope scope;
+    public ClassDecl tree;
+    public Type type;
 }

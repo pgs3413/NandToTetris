@@ -110,6 +110,7 @@ public class MemberEnter extends Visitor {
             Utils.exit(symbol.tree.fileName + ": duplicated filed name " + that.subroutineName);
         }
         scope.table.put(that.subroutineName, subroutineSymbol);
+        that.sym = subroutineSymbol;
     }
 
     @Override

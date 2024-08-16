@@ -14,8 +14,8 @@ public class Type {
     public static Type boolType = new Type(TypeKind.BOOL);
     public static Type voidType = new Type(TypeKind.VOID);
 
-    Symbol sym;
-    TypeKind typeKind;
+    public Symbol sym;
+    public TypeKind typeKind;
 
     public Type(TypeKind typeKind){
         this.typeKind = typeKind;

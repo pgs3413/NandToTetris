@@ -1,0 +1,5 @@
+function Hello.test01 1
+push argument 0
+pop local 0
+push local 0
+return
