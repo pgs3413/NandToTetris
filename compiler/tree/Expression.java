@@ -107,6 +107,11 @@ public abstract class Expression implements Tree {
         }
 
         @Override
+        public void accept(Visitor v) {
+            v.visitArrayAccess(this);
+        }
+
+        @Override
         public List<Node> toNodeList(){
             List<Node> nodeList = new ArrayList<>();
             nodeList.add(Node.ValueNode.of("identifier", name));

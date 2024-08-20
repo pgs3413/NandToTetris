@@ -71,6 +71,10 @@ public abstract class Visitor {
         visitTree(that);
     }
 
+    public void visitArrayAccess(ArrayAccess that){
+        visitTree(that);
+    }
+
     public void visitSubroutineCall(SubroutineCall that){
         visitTree(that);
     }

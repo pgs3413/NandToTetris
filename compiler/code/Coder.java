@@ -78,14 +78,20 @@ public class Coder extends Visitor {
                 && varSymbol.type != resultType){
             exit("let statement type not match " + that.varName.name);
         }
-        String s = null;
-        switch (varSymbol.varType){
-            case PARAM: s = "pop argument " + varSymbol.index; break;
-            case VAR: s = "pop local " + varSymbol.index; break;
-            case FIELD: s = "pop this " + varSymbol.index;break;
-            case STATIC: s = "pop static " + varSymbol.index;break;
+        String segment = varSymbol.varType.segment;
+        if(that.varName instanceof ArrayAccess){
+            ArrayAccess aa = (ArrayAccess) that.varName;
+            aa.index.accept(this);
+            if(resultType != Type.intType){
+                exit("array index must be integer");
+            }
+            vms.add("push " + segment + " " + varSymbol.index);
+            vms.add("add");
+            vms.add("pop pointer 1");
+            vms.add("pop that 0");
+        }else {
+            vms.add("pop " + segment + " " + varSymbol.index);
         }
-        vms.add(s);
     }
 
     @Override
@@ -131,14 +137,21 @@ public class Coder extends Visitor {
     @Override
     public void visitIdentifier(Identifier that) {
         VarSymbol varSymbol = getVarSymbol(that.name);
-        String s = null;
-        switch (varSymbol.varType){
-            case PARAM: s = "push argument " + varSymbol.index; break;
-            case VAR: s = "push local " + varSymbol.index; break;
-            case FIELD:
-            case STATIC: Utils.exit("TODO");
+        vms.add("push " + varSymbol.varType.segment + " " + varSymbol.index);
+        resultType = varSymbol.type;
+    }
+
+    @Override
+    public void visitArrayAccess(ArrayAccess that) {
+        VarSymbol varSymbol = getVarSymbol(that.name);
+        that.index.accept(this);
+        if(resultType != Type.intType){
+            exit("array index must be integer");
         }
-        vms.add(s);
+        vms.add("push " + varSymbol.varType.segment + " " + varSymbol.index);
+        vms.add("add");
+        vms.add("pop pointer 1");
+        vms.add("push that 0");
         resultType = varSymbol.type;
     }
 
