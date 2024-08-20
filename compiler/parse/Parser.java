@@ -26,6 +26,7 @@ import static tree.Expression.*;
 public class Parser {
 
     private final Scanner s;
+    private boolean existReturn;
 
     public Parser(Path source) throws IOException {
         s = new Scanner(source);
@@ -82,10 +83,16 @@ public class Parser {
     List<SubroutineDecl> parseSubroutines(){
         List<SubroutineDecl> subroutineDecls = new ArrayList<>();
         while (s.token() == CONSTRUCTOR || s.token() == FUNCTION || s.token() == METHOD){
+            existReturn = false;
             SubroutineType subroutineType = s.token() == CONSTRUCTOR ? SubroutineType.CONSTRUCTOR :
                     s.token() == FUNCTION ? SubroutineType.FUNCTION : SubroutineType.METHOD;
             s.nextToken();
-            TypeDecl typeDecl = parseType(Arrays.asList(INT, CHAR, BOOLEAN, VOID, IDENTIFIER));
+            TypeDecl typeDecl;
+           if(subroutineType != SubroutineType.CONSTRUCTOR){
+               typeDecl  = parseType(Arrays.asList(INT, CHAR, BOOLEAN, VOID, IDENTIFIER));
+           }else {
+               typeDecl = ClassType(s.className());
+           }
             String subroutineName = accept(IDENTIFIER);
             accept(LPAREN);
             List<ParameterDecl> parameterDecls = parseParameter();
@@ -94,6 +101,19 @@ public class Parser {
             List<VarDecl> varDecls = parseSubroutineVar();
             List<Statement> statements = parseStatements();
             accept(RBRACE);
+            if(!existReturn){
+                ReturnStatement returnStatement;
+                if(subroutineType != SubroutineType.CONSTRUCTOR){
+                    if (typeDecl != TypeDecl.voidType){
+                        Utils.exit(s.fileName() + ": subroutine " + subroutineName
+                                + ": lack of return statement");
+                    }
+                    returnStatement = ReturnStatement(null);
+                }else {
+                    returnStatement = ReturnStatement(KeyWordConstant(KeyWord.THIS));
+                }
+                statements.add(returnStatement);
+            }
             subroutineDecls.add(SubroutineDecl(subroutineType, typeDecl, subroutineName, parameterDecls, varDecls, statements));
         }
         return subroutineDecls;
@@ -196,6 +216,7 @@ public class Parser {
     }
 
     ReturnStatement parseReturn(){
+        existReturn = true;
         accept(RETURN);
         if(s.token() == SEMI){
             accept(SEMI);

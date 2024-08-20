@@ -39,5 +39,6 @@ public class Main {
         Compiler compiler = new Compiler(jackFiles, path);
         compiler.compile();
 
+        System.out.println("compile successfully!");
     }
 }

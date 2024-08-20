@@ -22,6 +22,7 @@ public class Coder extends Visitor {
     SubroutineSymbol symbol;
     List<String> vms;
     Type resultType;
+    boolean isFunction;
 
     public Coder(Path targetPath, Scope rootScope){
         this.targetPath = targetPath;
@@ -44,9 +45,22 @@ public class Coder extends Visitor {
         String functionTitle = "function " + classSymbol.name + "." + symbol.name + " "
                 + (symbol.scope.table.size() - symbol.params.size());
         vms.add(functionTitle);
+        isFunction = false;
         switch (symbol.subroutineType){
-            case METHOD: break;
-            case CONSTRUCTOR: break;
+            case FUNCTION:
+                isFunction = true;
+                break;
+            case METHOD:
+                vms.add("push argument 0");
+                vms.add("pop pointer 0");
+                break;
+            case CONSTRUCTOR:
+                long fieldCnt = classSymbol.scope.table.values().stream().
+                        filter(sym -> sym instanceof VarSymbol && ((VarSymbol)sym).varType == VarType.FIELD).count();
+                vms.add("push constant " + fieldCnt);
+                vms.add("call Memory.alloc 1");
+                vms.add("pop pointer 0");
+                break;
         }
 
         for(Statement tree: that.statements){
@@ -68,8 +82,8 @@ public class Coder extends Visitor {
         switch (varSymbol.varType){
             case PARAM: s = "pop argument " + varSymbol.index; break;
             case VAR: s = "pop local " + varSymbol.index; break;
-            case FIELD:
-            case STATIC: Utils.exit("TODO");
+            case FIELD: s = "pop this " + varSymbol.index;break;
+            case STATIC: s = "pop static " + varSymbol.index;break;
         }
         vms.add(s);
     }
@@ -91,7 +105,28 @@ public class Coder extends Visitor {
         vms.add("return");
     }
 
+
     /** visit expression */
+
+    @Override
+    public void visitIntegerConstant(IntegerConstant that) {
+        vms.add("push constant " + that.value.toString());
+        resultType = Type.intType;
+    }
+
+    @Override
+    public void visitKeyWordConstant(KeyWordConstant that) {
+       switch (that.value){
+           case THIS:
+               if(isFunction) exit("can not use keyword this");
+               vms.add("push pointer 0");
+               resultType = classSymbol.type;
+               break;
+           case TRUE:
+           case FALSE:
+           case NULL: Utils.exit("TODO");
+       }
+    }
 
     @Override
     public void visitIdentifier(Identifier that) {
@@ -111,6 +146,15 @@ public class Coder extends Visitor {
 
     private VarSymbol getVarSymbol(String name){
         VarSymbol varSymbol = (VarSymbol) symbol.scope.table.get(name);
+        if(varSymbol == null){
+            Symbol nextSymbol = classSymbol.scope.table.get(name);
+            if(nextSymbol instanceof VarSymbol){
+                VarSymbol nextVarSymbol = (VarSymbol) nextSymbol;
+                if(nextVarSymbol.varType == VarType.STATIC || !isFunction){
+                    varSymbol = nextVarSymbol;
+                }
+            }
+        }
         if(varSymbol == null){
             exit("undefined identifier " + name);
         }

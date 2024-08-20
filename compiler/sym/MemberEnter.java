@@ -99,6 +99,9 @@ public class MemberEnter extends Visitor {
         varIndex = 0;
         Scope temp = scope;
         scope = subroutineSymbol.scope;
+        if(that.subroutineType == SubroutineType.METHOD){
+            thisSymbol();
+        }
         for(ParameterDecl tree: that.parameterDecls){
             tree.accept(this);
         }
@@ -111,6 +114,16 @@ public class MemberEnter extends Visitor {
         }
         scope.table.put(that.subroutineName, subroutineSymbol);
         that.sym = subroutineSymbol;
+    }
+
+    private void thisSymbol(){
+        VarSymbol varSymbol = new VarSymbol();
+        varSymbol.name = "this";
+        varSymbol.varType = VarType.PARAM;
+        varSymbol.type = symbol.type;
+        varSymbol.index = paramIndex++;
+        params.add(varSymbol);
+        scope.table.put("this", varSymbol);
     }
 
     @Override

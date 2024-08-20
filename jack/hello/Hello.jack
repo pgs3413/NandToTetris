@@ -1,9 +1,9 @@
 class Hello {
 
-    function int test01(int a){
-        var int b;
-        let b = a;
-        return b;
+    field int a, b;
+
+    constructor new(){
+        let a = 1;
     }
 
 }
