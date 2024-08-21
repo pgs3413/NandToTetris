@@ -54,7 +54,7 @@ public class Parser {
         String typeName = accept(tokens);
         TypeDecl typeDecl;
         if(lastToken == INT) typeDecl = IntType();
-        else if(lastToken == CHAR) typeDecl = CharType();
+//        else if(lastToken == CHAR) typeDecl = CharType();
         else if(lastToken == BOOLEAN) typeDecl = BoolType();
         else if(lastToken == VOID) typeDecl = VoidType();
         else typeDecl = ClassType(typeName);
@@ -66,7 +66,7 @@ public class Parser {
         while (s.token() == STATIC || s.token() == FIELD){
             VarType varType = s.token() == STATIC ? VarType.STATIC : VarType.FIELD;
             s.nextToken();
-            TypeDecl typeDecl = parseType(Arrays.asList(INT, CHAR, BOOLEAN, IDENTIFIER));
+            TypeDecl typeDecl = parseType(Arrays.asList(INT, BOOLEAN, IDENTIFIER));
             String varName = accept(IDENTIFIER);
             List<String> varNames = new ArrayList<>();
             varNames.add(varName);
@@ -89,7 +89,7 @@ public class Parser {
             s.nextToken();
             TypeDecl typeDecl;
            if(subroutineType != SubroutineType.CONSTRUCTOR){
-               typeDecl  = parseType(Arrays.asList(INT, CHAR, BOOLEAN, VOID, IDENTIFIER));
+               typeDecl  = parseType(Arrays.asList(INT, BOOLEAN, VOID, IDENTIFIER));
            }else {
                typeDecl = ClassType(s.className());
            }
@@ -124,12 +124,12 @@ public class Parser {
         TypeDecl typeDecl;
         String parameterName;
         if (s.token() != RPAREN){
-            typeDecl = parseType(Arrays.asList(INT, CHAR, BOOLEAN, IDENTIFIER));
+            typeDecl = parseType(Arrays.asList(INT, BOOLEAN, IDENTIFIER));
             parameterName = accept(IDENTIFIER);
             parameterDecls.add(ParameterDecl(typeDecl, parameterName));
             while (s.token() == COMMA){
                 s.nextToken();
-                typeDecl = parseType(Arrays.asList(INT, CHAR, BOOLEAN, IDENTIFIER));
+                typeDecl = parseType(Arrays.asList(INT, BOOLEAN, IDENTIFIER));
                 parameterName = accept(IDENTIFIER);
                 parameterDecls.add(ParameterDecl(typeDecl, parameterName));
             }
@@ -141,7 +141,7 @@ public class Parser {
         List<VarDecl> varDecls = new ArrayList<>();
         while (s.token() == VAR){
             s.nextToken();
-            TypeDecl typeDecl = parseType(Arrays.asList(INT, CHAR, BOOLEAN, IDENTIFIER));
+            TypeDecl typeDecl = parseType(Arrays.asList(INT, BOOLEAN, IDENTIFIER));
             String varName = accept(IDENTIFIER);
             List<String> varNames = new ArrayList<>();
             varNames.add(varName);
@@ -260,7 +260,7 @@ public class Parser {
 
     Expression parseExpression(){
         Term term1 = parseTerm();
-        if(Arrays.asList(PLUS, SUB, STAR, SLASH, AND, OR, LT, GT, EQ, NOT).contains(s.token())){
+        if(Arrays.asList(PLUS, SUB, STAR, SLASH, LT, GT, EQ).contains(s.token())){
             Token lastToken = s.token();
             s.nextToken();
             Term term2 = parseTerm();
@@ -270,8 +270,8 @@ public class Parser {
                 case SUB: op = Op.SUB;break;
                 case STAR: op = Op.STAR;break;
                 case SLASH: op = Op.SLASH;break;
-                case AND: op = Op.AND;break;
-                case OR: op = Op.OR;break;
+//                case AND: op = Op.AND;break;
+//                case OR: op = Op.OR;break;
                 case LT: op = Op.LT;break;
                 case GT: op = Op.GT;break;
                 case EQ: op = Op.EQ;break;
@@ -307,8 +307,8 @@ public class Parser {
                 Expression expr = parseExpression();
                 accept(RPAREN);
                 return Parens(expr);
-            case SUB: case NOT:
-                Op op = s.token() == SUB ? Op.SUB : Op.NOT;
+            case SUB:
+                Op op = s.token() == SUB ? Op.NEG : Op.NOT;
                 s.nextToken();
                 Term term = parseTerm();
                 return Unary(op, term);
@@ -330,7 +330,7 @@ public class Parser {
                 return identifier;
             default:
                 expectedError(Arrays.asList(INTCONSTANT, STRINGCONSTANT,
-                        TRUE, FALSE, NULL, THIS, LPAREN, SUB, NOT, IDENTIFIER));
+                        TRUE, FALSE, NULL, THIS, LPAREN, SUB, IDENTIFIER));
                 return null;
         }
     }

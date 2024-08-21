@@ -2,7 +2,11 @@ package tree;
 
 public enum TypeKind {
 
-    INT("int"),CHAR("char"),BOOL("boolean"),VOID("void"),CLASS;
+    INT("int"),
+    BOOL("boolean"),
+    VOID("void"),
+    CLASS,
+    Array;
 
     public String name;
     TypeKind(){

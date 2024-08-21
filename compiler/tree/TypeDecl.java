@@ -1,6 +1,7 @@
 package tree;
 
 import xml.Node;
+import xml.ValueNode;
 
 /**
  * @Author: pangs
@@ -10,9 +11,11 @@ import xml.Node;
 public class TypeDecl implements Tree{
 
     public static TypeDecl intType = new TypeDecl(TypeKind.INT);
-    public static TypeDecl charType = new TypeDecl(TypeKind.CHAR);
     public static TypeDecl boolType = new TypeDecl(TypeKind.BOOL);
     public static TypeDecl voidType = new TypeDecl(TypeKind.VOID);
+    public static TypeDecl intArrayType = new TypeDecl("int", TypeKind.Array);
+    public static TypeDecl boolArrayType = new TypeDecl("boolean", TypeKind.Array);
+
 
     public String name;
     public TypeKind typeKind;
@@ -33,10 +36,13 @@ public class TypeDecl implements Tree{
     }
     @Override
     public Node toXml() {
-        if(typeKind != TypeKind.CLASS){
-            return Node.ValueNode.of("keyword", name);
+        String s;
+        if(typeKind == TypeKind.Array){
+            s = "Array[" + name + "]";
+        }else {
+            s = name;
         }
-        return Node.ValueNode.of("identifier", name);
+        return ValueNode.of("type", name);
     }
 
 }

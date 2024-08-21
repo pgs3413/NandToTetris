@@ -1,8 +1,9 @@
 package tree;
 
 import sym.SubroutineSymbol;
-import sym.Symbol;
+import xml.ListNode;
 import xml.Node;
+import xml.ValueNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +18,12 @@ public class SubroutineDecl implements Tree{
     public SubroutineType subroutineType;
     public TypeDecl returnType;
     public String subroutineName;
-    public List<ParameterDecl> parameterDecls;
+    public List<VarDecl> parameterDecls;
     public List<VarDecl> varDecls;
     public List<Statement> statements;
     public SubroutineSymbol sym;
 
-    public SubroutineDecl(SubroutineType subroutineType, TypeDecl returnType, String subroutineName, List<ParameterDecl> parameterDecls, List<VarDecl> varDecls, List<Statement> statements) {
+    public SubroutineDecl(SubroutineType subroutineType, TypeDecl returnType, String subroutineName, List<VarDecl> parameterDecls, List<VarDecl> varDecls, List<Statement> statements) {
         this.subroutineType = subroutineType;
         this.returnType = returnType;
         this.subroutineName = subroutineName;
@@ -41,40 +42,24 @@ public class SubroutineDecl implements Tree{
 
         List<Node> nodeList = new ArrayList<>();
 
-        nodeList.add(Node.ValueNode.of("keyword", subroutineType.name));
+        nodeList.add(ValueNode.of("subroutineType", subroutineType.name));
         nodeList.add(returnType.toXml());
-        nodeList.add(Node.ValueNode.of("identifier", subroutineName));
-        nodeList.add(Node.ValueNode.of("symbol", "("));
-
-        //parameterList
-        List<Node> parameterList = new ArrayList<>();
-        if(parameterDecls.size() > 0){
-            parameterList.add(parameterDecls.get(0).typeDecl.toXml());
-            parameterList.add(Node.ValueNode.of("identifier", parameterDecls.get(0).parameterName));
-            for(int i = 1; i < parameterDecls.size(); i++){
-                parameterList.add(Node.ValueNode.of("symbol", ","));
-                parameterList.add(parameterDecls.get(i).typeDecl.toXml());
-                parameterList.add(Node.ValueNode.of("identifier", parameterDecls.get(i).parameterName));
-            }
+        nodeList.add(ValueNode.of("name", subroutineName));
+        //parameters
+        for(VarDecl tree: parameterDecls){
+            nodeList.add(tree.toXml());
         }
-        nodeList.add(Node.ListNode.of("parameterList", parameterList));
 
-        nodeList.add(Node.ValueNode.of("symbol", ")"));
-
-        //subroutineBody
-        List<Node> subroutineBody = new ArrayList<>();
-        subroutineBody.add(Node.ValueNode.of("symbol", "{"));
-        for(VarDecl x : varDecls) subroutineBody.add(x.toXml());
+        //local vars
+        for(VarDecl tree : varDecls) {
+            nodeList.add(tree.toXml());
+        }
 
         //statements
-        List<Node> statementNodes = new ArrayList<>();
-        for(Statement s : statements) statementNodes.add(s.toXml());
-        subroutineBody.add(Node.ListNode.of("statements", statementNodes));
+        for(Statement tree : statements){
+            nodeList.add(tree.toXml());
+        }
 
-        subroutineBody.add(Node.ValueNode.of("symbol", "}"));
-
-        nodeList.add(Node.ListNode.of("subroutineBody", subroutineBody));
-
-        return Node.ListNode.of("subroutineDec", nodeList);
+        return ListNode.of("subroutine", nodeList);
     }
 }

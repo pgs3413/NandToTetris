@@ -7,12 +7,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import token.Token;
 import tree.Tree;
-import xml.Node.*;
 
 /**
  * @Author: pangs
@@ -20,6 +20,14 @@ import xml.Node.*;
  * @description: xmlUtils
  */
 public class XmlUtils {
+
+    public static void main(String[] args) throws IOException {
+
+        Path source = Paths.get("jack/test/os/Math.jack");
+        Path target = Paths.get("jack/test/os/Math.xml");
+        tokenizing(source, target);
+
+    }
 
     public static void tokenizing(Path source, Path target) throws IOException {
 

@@ -1,9 +1,8 @@
 class Hello {
 
-    field int a, b;
-
-    constructor new(){
-        let a = 1;
+    function void test(char a){
+        let a = 1 = 2;
+        return;
     }
 
 }

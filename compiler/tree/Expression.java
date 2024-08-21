@@ -1,9 +1,10 @@
 package tree;
 
+import xml.ListNode;
 import xml.Node;
+import xml.ValueNode;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,18 +15,8 @@ import java.util.List;
  */
 public abstract class Expression implements Tree {
 
-    public abstract static class Term extends Expression {
-        @Override
-        public Node toXml() {
-            return Node.ListNode.of("expression", Collections.singletonList(toTermNode()));
-        }
-        public Node toTermNode(){
-            return Node.ListNode.of("term", toNodeList());
-        }
-        abstract List<Node> toNodeList();
-    }
 
-    public static class IntegerConstant extends Term{
+    public static class IntegerConstant extends Expression{
         public Integer value;
 
         public IntegerConstant(Integer value) {
@@ -38,12 +29,12 @@ public abstract class Expression implements Tree {
         }
 
         @Override
-        List<Node> toNodeList() {
-            return Collections.singletonList(Node.ValueNode.of("integerConstant", value.toString()));
+        public Node toXml() {
+            return ValueNode.of("integer", value.toString());
         }
     }
 
-    public static class StringConstant extends Term{
+    public static class StringConstant extends Expression{
         public String value;
 
         public StringConstant(String value) {
@@ -56,13 +47,12 @@ public abstract class Expression implements Tree {
         }
 
         @Override
-        List<Node> toNodeList() {
-            return Collections.singletonList(Node.ValueNode.of("stringConstant", value));
+        public Node toXml() {
+            return ValueNode.of("string", value);
         }
-
     }
 
-    public static class KeyWordConstant extends Term {
+    public static class KeyWordConstant extends Expression {
         public KeyWord value;
 
         public KeyWordConstant(KeyWord value) {
@@ -75,12 +65,12 @@ public abstract class Expression implements Tree {
         }
 
         @Override
-        List<Node> toNodeList() {
-            return Collections.singletonList(Node.ValueNode.of("keyword", value.name));
+        public Node toXml() {
+            return ValueNode.of("keyword", value.name);
         }
     }
 
-    public static class Identifier extends Term{
+    public static class Identifier extends Expression{
         public String name;
 
         public Identifier(String name) {
@@ -93,16 +83,17 @@ public abstract class Expression implements Tree {
         }
 
         @Override
-        public List<Node> toNodeList(){
-            return Collections.singletonList(Node.ValueNode.of("identifier", name));
+        public Node toXml() {
+            return ValueNode.of("identifier", name);
         }
     }
 
-    public static class ArrayAccess extends Identifier {
+    public static class ArrayAccess extends Expression {
+        public Expression arrayName;
         public Expression index;
 
-        public ArrayAccess(String name, Expression index) {
-            super(name);
+        public ArrayAccess(Expression arrayName, Expression index) {
+            this.arrayName = arrayName;
             this.index = index;
         }
 
@@ -112,39 +103,44 @@ public abstract class Expression implements Tree {
         }
 
         @Override
-        public List<Node> toNodeList(){
+        public Node toXml() {
             List<Node> nodeList = new ArrayList<>();
-            nodeList.add(Node.ValueNode.of("identifier", name));
-            nodeList.add(Node.ValueNode.of("symbol", "["));
-            nodeList.add(index.toXml());
-            nodeList.add(Node.ValueNode.of("symbol", "]"));
-            return nodeList;
+            nodeList.add(ListNode.of("name", Collections.singletonList(arrayName.toXml())));
+            nodeList.add(ListNode.of("index", Collections.singletonList(index.toXml())));
+            return ListNode.of("arrayAccess", nodeList);
         }
     }
 
-    public static class FieldAccess extends Identifier{
-        public Identifier own;
+    public static class FieldAccess extends Expression{
+        public String name;
+        public Expression own;
 
-        public FieldAccess(String name, Identifier own) {
-            super(name);
+        public FieldAccess(String name, Expression own) {
+            this.name = name;
             this.own = own;
         }
 
         @Override
-        public List<Node> toNodeList(){
-            List<Node> nodeList = new ArrayList<>(own.toNodeList());
-            nodeList.add(Node.ValueNode.of("symbol", "."));
-            nodeList.add(Node.ValueNode.of("identifier", name));
-            return nodeList;
+        public void accept(Visitor v) {
+            v.visitFieldAccess(this);
         }
+
+        @Override
+        public Node toXml() {
+            List<Node> nodeList = new ArrayList<>();
+            nodeList.add(ListNode.of("own", Collections.singletonList(own.toXml())));
+            nodeList.add(ValueNode.of("name", name));
+            return ListNode.of("filedAccess", nodeList);
+        }
+
     }
 
 
-    public static class SubroutineCall extends Term {
-        public Identifier subroutineName;
+    public static class SubroutineCall extends Expression {
+        public Expression subroutineName;
         public List<Expression> args;
 
-        public SubroutineCall(Identifier subroutineName, List<Expression> args) {
+        public SubroutineCall(Expression subroutineName, List<Expression> args) {
             this.subroutineName = subroutineName;
             this.args = args;
         }
@@ -154,26 +150,18 @@ public abstract class Expression implements Tree {
             v.visitSubroutineCall(this);
         }
 
-        public List<Node> toNodeList(){
-            List<Node> nodeList = new ArrayList<>(subroutineName.toNodeList());
-            nodeList.add(Node.ValueNode.of("symbol", "("));
-            //expressionList
-            List<Node> expressionList = new ArrayList<>();
-            if(args.size() > 0){
-                expressionList.add(args.get(0).toXml());
-                for(int i = 1; i < args.size(); i++){
-                    expressionList.add(Node.ValueNode.of("symbol", ","));
-                    expressionList.add(args.get(i).toXml());
-                }
-            }
-            nodeList.add(Node.ListNode.of("expressionList", expressionList));
-            nodeList.add(Node.ValueNode.of("symbol", ")"));
-            return nodeList;
+        @Override
+        public Node toXml() {
+            List<Node> nodeList = new ArrayList<>();
+            nodeList.add(ListNode.of("subroutineName", Collections.singletonList(subroutineName.toXml())));
+            List<Node> argsList = new ArrayList<>();
+            for(Expression tree: args) argsList.add(tree.toXml());
+            nodeList.add(ListNode.of("args", argsList));
+            return ListNode.of("subroutineCall", nodeList);
         }
-
     }
 
-    public static class Parens extends Term{
+    public static class Parens extends Expression{
         public Expression expr;
 
         public Parens(Expression expr) {
@@ -186,20 +174,65 @@ public abstract class Expression implements Tree {
         }
 
         @Override
-        List<Node> toNodeList() {
-            List<Node> nodeList = new ArrayList<>();
-            nodeList.add(Node.ValueNode.of("symbol", "("));
-            nodeList.add(expr.toXml());
-            nodeList.add(Node.ValueNode.of("symbol", ")"));
-            return nodeList;
+        public Node toXml() {
+            return ListNode.of("paren", Collections.singletonList(expr.toXml()));
         }
     }
 
-    public static class Unary extends Term{
-        public Op op;
-        public Term term;
+    public static class NewClass extends Expression{
+        public String className;
+        List<Expression> args;
 
-        public Unary(Op op, Term term) {
+        public NewClass(String className, List<Expression> args){
+            this.className = className;
+            this.args = args;
+        }
+
+        @Override
+        public void accept(Visitor v) {
+            v.visitNewClass(this);
+        }
+
+        @Override
+        public Node toXml() {
+           List<Node> nodeList = new ArrayList<>();
+           nodeList.add(ValueNode.of("className", className));
+           List<Node> argsList = new ArrayList<>();
+           for(Expression tree: args) argsList.add(tree.toXml());
+           nodeList.add(ListNode.of("args", argsList));
+           return ListNode.of("newClass", nodeList);
+        }
+
+    }
+
+    public static class NewArray extends Expression{
+        public String typeName;
+        public Expression size;
+
+        public NewArray(String typeName, Expression size){
+            this.typeName = typeName;
+            this.size = size;
+        }
+
+        @Override
+        public void accept(Visitor v) {
+            v.visitNewArray(this);
+        }
+
+        @Override
+        public Node toXml() {
+            List<Node> nodeList = new ArrayList<>();
+            nodeList.add(ValueNode.of("typeName", typeName));
+            nodeList.add(ListNode.of("size", Collections.singletonList(size.toXml())));
+            return ListNode.of("newArray", nodeList);
+        }
+    }
+
+    public static class Unary extends Expression{
+        public Op op;
+        public Expression term;
+
+        public Unary(Op op, Expression term) {
             this.op = op;
             this.term = term;
         }
@@ -210,23 +243,23 @@ public abstract class Expression implements Tree {
         }
 
         @Override
-        List<Node> toNodeList() {
+        public Node toXml() {
             List<Node> nodeList = new ArrayList<>();
-            nodeList.add(Node.ValueNode.of("symbol", op.name));
-            nodeList.add(term.toTermNode());
-            return nodeList;
+            nodeList.add(ValueNode.of("op", op.name));
+            nodeList.add(ListNode.of("term", Collections.singletonList(term.toXml())));
+            return ListNode.of("unary", nodeList);
         }
     }
 
     public static class Binary extends Expression {
         public Op op;
-        public Term term1;
-        public Term term2;
+        public Expression expr1;
+        public Expression expr2;
 
-        public Binary(Op op, Term term1, Term term2) {
+        public Binary(Op op, Expression expr1, Expression expr2) {
             this.op = op;
-            this.term1 = term1;
-            this.term2 = term2;
+            this.expr1 = expr1;
+            this.expr2 = expr2;
         }
 
         @Override
@@ -237,10 +270,10 @@ public abstract class Expression implements Tree {
         @Override
         public Node toXml() {
             List<Node> nodeList = new ArrayList<>();
-            nodeList.add(term1.toTermNode());
-            nodeList.add(Node.ValueNode.of("symbol", op.name));
-            nodeList.add(term2.toTermNode());
-            return Node.ListNode.of("expression", nodeList);
+            nodeList.add(ValueNode.of("op", op.name));
+            nodeList.add(ListNode.of("expr1", Collections.singletonList(expr1.toXml())));
+            nodeList.add(ListNode.of("expr2", Collections.singletonList(expr2.toXml())));
+            return ListNode.of("binary", nodeList);
         }
     }
 

@@ -1,6 +1,8 @@
 package tree;
 
+import xml.ListNode;
 import xml.Node;
+import xml.ValueNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,14 +32,11 @@ public class VarDecl implements Tree{
     @Override
     public Node toXml() {
         List<Node> nodeList = new ArrayList<>();
-        nodeList.add(Node.ValueNode.of("keyword", varType.name));
+        nodeList.add(ValueNode.of("varType", varType.name));
         nodeList.add(typeDecl.toXml());
-        nodeList.add(Node.ValueNode.of("identifier", varNames.get(0)));
-        for(int i = 1; i < varNames.size(); i++){
-            nodeList.add(Node.ValueNode.of("symbol", ","));
-            nodeList.add(Node.ValueNode.of("identifier", varNames.get(i)));
+        for(String name: varNames){
+            nodeList.add(ValueNode.of("name", name));
         }
-        nodeList.add(Node.ValueNode.of("symbol", ";"));
-        return Node.ListNode.of(varType == VarType.VAR ? "varDec" : "classVarDec", nodeList);
+        return ListNode.of(varType == VarType.VAR ? "var" : "classVar", nodeList);
     }
 }

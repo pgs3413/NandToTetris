@@ -14,7 +14,6 @@ public enum Token {
     STATIC("static",Type.K),
     VAR("var", Type.K),
     INT("int", Type.K),
-    CHAR("char", Type.K),
     BOOLEAN("boolean", Type.K),
     VOID("void", Type.K),
     TRUE("true", Type.K),
@@ -38,16 +37,27 @@ public enum Token {
     DOT(".", Type.S),
     COMMA(",", Type.S),
     SEMI(";", Type.S),
+
     PLUS("+", Type.S),
     SUB("-", Type.S),
     STAR("*", Type.S),
     SLASH("/", Type.S),
-    AND("&", Type.S),
-    OR("|", Type.S),
+    AMP("&", Type.S),
+    BAR("|", Type.S),
+    TILDE("~", Type.S),
+
     LT("<", Type.S),
     GT(">", Type.S),
+    LTEQ("<=", Type.S),
+    GTEQ(">=", Type.S),
+    EQEQ("==", Type.S),
+    BANGEQ("!=", Type.S),
+
+    AMPAMP("&&", Type.S),
+    BARBAR("||", Type.S),
+    BANG("!", Type.S),
+
     EQ("=", Type.S),
-    NOT("~", Type.S),
 
     INTCONSTANT("整型常量",Type.IC),
     STRINGCONSTANT("字符串常量",Type.SC),

@@ -1,8 +1,11 @@
 package tree;
 
+import xml.ListNode;
 import xml.Node;
+import xml.ValueNode;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,10 +17,10 @@ public abstract class Statement implements Tree{
 
 
     public static class LetStatement extends Statement{
-        public Expression.Identifier varName;
+        public Expression varName;
         public Expression init;
 
-        public LetStatement(Expression.Identifier varName, Expression init) {
+        public LetStatement(Expression varName, Expression init) {
             this.varName = varName;
             this.init = init;
         }
@@ -30,12 +33,9 @@ public abstract class Statement implements Tree{
         @Override
         public Node toXml() {
             List<Node> nodeList = new ArrayList<>();
-            nodeList.add(Node.ValueNode.of("keyword", "let"));
-            nodeList.addAll(varName.toNodeList());
-            nodeList.add(Node.ValueNode.of("symbol", "="));
-            nodeList.add(init.toXml());
-            nodeList.add(Node.ValueNode.of("symbol", ";"));
-            return Node.ListNode.of("letStatement", nodeList);
+            nodeList.add(ListNode.of("target", Collections.singletonList(varName.toXml())));
+            nodeList.add(ListNode.of("init", Collections.singletonList(init.toXml())));
+            return ListNode.of("let", nodeList);
         }
     }
 
@@ -58,26 +58,16 @@ public abstract class Statement implements Tree{
         @Override
         public Node toXml() {
             List<Node> nodeList = new ArrayList<>();
-            nodeList.add(Node.ValueNode.of("keyword", "if"));
-            nodeList.add(Node.ValueNode.of("symbol", "("));
-            nodeList.add(condition.toXml());
-            nodeList.add(Node.ValueNode.of("symbol", ")"));
-            nodeList.add(Node.ValueNode.of("symbol", "{"));
+            nodeList.add(ListNode.of("condition", Collections.singletonList(condition.toXml())));
             //thenPart
-            List<Node> statements1 = new ArrayList<>();
-            for(Statement s : thenPart) statements1.add(s.toXml());
-            nodeList.add(Node.ListNode.of("statements", statements1));
-            nodeList.add(Node.ValueNode.of("symbol", "}"));
+            List<Node> thenStatement = new ArrayList<>();
+            for(Statement s : thenPart) thenStatement.add(s.toXml());
+            nodeList.add(ListNode.of("then", thenStatement));
             //elsePart
-            if(elsePart != null){
-                nodeList.add(Node.ValueNode.of("keyword", "else"));
-                nodeList.add(Node.ValueNode.of("symbol", "{"));
-                List<Node> statements2 = new ArrayList<>();
-                for(Statement s : elsePart) statements2.add(s.toXml());
-                nodeList.add(Node.ListNode.of("statements", statements2));
-                nodeList.add(Node.ValueNode.of("symbol", "}"));
-            }
-            return Node.ListNode.of("ifStatement", nodeList);
+            List<Node> elseStatement = new ArrayList<>();
+            for(Statement s : elsePart) elseStatement.add(s.toXml());
+            nodeList.add(ListNode.of("else", elseStatement));
+            return ListNode.of("if", nodeList);
         }
     }
 
@@ -98,16 +88,11 @@ public abstract class Statement implements Tree{
         @Override
         public Node toXml() {
             List<Node> nodeList = new ArrayList<>();
-            nodeList.add(Node.ValueNode.of("keyword", "while"));
-            nodeList.add(Node.ValueNode.of("symbol", "("));
-            nodeList.add(condition.toXml());
-            nodeList.add(Node.ValueNode.of("symbol", ")"));
-            nodeList.add(Node.ValueNode.of("symbol", "{"));
+            nodeList.add(ListNode.of("condition", Collections.singletonList(condition.toXml())));
             List<Node> statements = new ArrayList<>();
             for(Statement s : body) statements.add(s.toXml());
-            nodeList.add(Node.ListNode.of("statements", statements));
-            nodeList.add(Node.ValueNode.of("symbol", "}"));
-            return Node.ListNode.of("whileStatement", nodeList);
+            nodeList.add(ListNode.of("body", statements));
+            return ListNode.of("while", nodeList);
         }
     }
 
@@ -126,10 +111,8 @@ public abstract class Statement implements Tree{
         @Override
         public Node toXml() {
             List<Node> nodeList = new ArrayList<>();
-            nodeList.add(Node.ValueNode.of("keyword", "do"));
-            nodeList.addAll(subroutineCall.toNodeList());
-            nodeList.add(Node.ValueNode.of("symbol", ";"));
-            return Node.ListNode.of("doStatement", nodeList);
+            nodeList.add(subroutineCall.toXml());
+            return ListNode.of("do", nodeList);
         }
     }
 
@@ -148,10 +131,8 @@ public abstract class Statement implements Tree{
         @Override
         public Node toXml() {
             List<Node> nodeList = new ArrayList<>();
-            nodeList.add(Node.ValueNode.of("keyword", "return"));
             if(value != null) nodeList.add(value.toXml());
-            nodeList.add(Node.ValueNode.of("symbol", ";"));
-            return Node.ListNode.of("returnStatement", nodeList);
+            return ListNode.of("return", nodeList);
         }
     }
 

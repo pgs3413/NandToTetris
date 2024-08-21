@@ -114,6 +114,34 @@ public class Scanner {
                 }
             }
 
+            char last;
+            switch (ch){
+                case '<': case '>': case '=': case '!':
+                    last = ch;
+                    scanChar();
+                    if(ch == '='){
+                        token = SYMBOL_MAP.get("" + last + '=');
+                        name = token.name;
+                        scanChar();
+                    }else {
+                        token = SYMBOL_MAP.get("" + last);
+                        name = token.name;
+                    }
+                    return;
+                case '&': case '|':
+                    last = ch;
+                    scanChar();
+                    if(ch == last){
+                        token = SYMBOL_MAP.get("" + last + last);
+                        name = token.name;
+                        scanChar();
+                    }else {
+                        token = SYMBOL_MAP.get("" + last);
+                        name = token.name;
+                    }
+                    return;
+            }
+
             token = SYMBOL_MAP.get(Character.toString(ch));
             if(token != null) {
                 name = token.name;

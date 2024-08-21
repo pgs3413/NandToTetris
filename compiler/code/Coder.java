@@ -152,7 +152,90 @@ public class Coder extends Visitor {
         vms.add("add");
         vms.add("pop pointer 1");
         vms.add("push that 0");
-        resultType = varSymbol.type;
+        resultType = Type.intType;
+    }
+
+    @Override
+    public void visitUnary(Unary that) {
+        that.term.accept(this);
+        switch (that.op){
+            case NEG:
+                if(resultType != Type.intType && resultType != Type.charType){
+                    exit("only char/int type can neg");
+                }
+                break;
+            case NOT:
+                if(resultType != Type.intType
+                        && resultType != Type.charType
+                        && resultType != Type.boolType){
+                    exit("only char/int/bool type can not");
+                }
+                break;
+            default: exit("unsupported err");
+        }
+        vms.add(that.op.cmd);
+    }
+
+    @Override
+    public void visitBinary(Binary that) {
+        that.term1.accept(this);
+        Type type1 = resultType;
+        that.term2.accept(this);
+        Type type2 = resultType;
+        switch (that.op){
+            case STAR: case SLASH: case PLUS:case SUB:case LT:case GT:
+                if(type1 != Type.intType && type1 != Type.charType ||
+                    type2 != Type.intType && type2 != Type.charType){
+                    exit("only int/char can " + that.op.name);
+                }
+                if(that.op == Op.LT || that.op == Op.GT){
+                    resultType = Type.boolType;
+                }else {
+                    resultType = Type.intType;
+                }
+                break;
+
+            case AND:case OR:
+                if(type1 == Type.intType || type1 == Type.charType){
+                    if(type2 != Type.intType && type2 != Type.charType){
+                        exit("type1 is int/char type2 must be int/char");
+                    }
+                    resultType = Type.intType;
+                }else if(type1 == Type.boolType){
+                    if(type2 != Type.boolType){
+                        exit("type1 is bool type2 must be bool");
+                    }
+                    resultType = Type.boolType;
+                }else {
+                    exit("only int/char/bool can and/or");
+                }
+                break;
+            case EQ:
+                if(type1 == Type.intType || type1 == Type.charType){
+                    if(type2 != Type.intType && type2 != Type.charType){
+                        exit("type1 is int/char type2 must be int/char when eq");
+                    }
+                }else if(type1 == Type.boolType){
+                    if(type2 != Type.boolType){
+                        exit("type1 is bool type2 must be bool when eq");
+                    }
+                }else if(type1.typeKind == TypeKind.CLASS){
+                    if(type1 != type2){
+                        exit("must be same class type when eq");
+                    }
+                } else {
+                    exit("only int/char/bool/class can eq");
+                }
+                resultType = Type.boolType;
+                break;
+            default:
+                exit("unsupported err");
+        }
+        if(that.op == Op.STAR || that.op == Op.SLASH){
+            vms.add("call " + that.op.cmd + " 2");
+        }else {
+            vms.add(that.op.cmd);
+        }
     }
 
     /** others */
@@ -172,6 +255,12 @@ public class Coder extends Visitor {
             exit("undefined identifier " + name);
         }
         return varSymbol;
+    }
+
+    private void checkCast(Type target, Type source, String msg){
+//        if(target == Type.intType){
+//            if(source == Type.)
+//        }
     }
 
     private void exit(String msg){

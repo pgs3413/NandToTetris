@@ -31,10 +31,6 @@ public abstract class Visitor {
         visitTree(that);
     }
 
-    public void visitParameterDecl(ParameterDecl that){
-        visitTree(that);
-    }
-
     public void visitLetStatement(LetStatement that){
         visitTree(that);
     }
@@ -75,7 +71,19 @@ public abstract class Visitor {
         visitTree(that);
     }
 
+    public void visitFieldAccess(FieldAccess that){
+        visitTree(that);
+    }
+
     public void visitSubroutineCall(SubroutineCall that){
+        visitTree(that);
+    }
+
+    public void visitNewClass(NewClass that){
+        visitTree(that);
+    }
+
+    public void visitNewArray(NewArray that){
         visitTree(that);
     }
 
