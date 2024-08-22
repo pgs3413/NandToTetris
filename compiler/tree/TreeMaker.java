@@ -22,7 +22,7 @@ public class TreeMaker {
     }
 
     public static VarDecl ParameterDecl(TypeDecl typeDecl, String parameterName){
-        return new VarDecl(VarType.PARAM ,typeDecl, Collections.singletonList(parameterName));
+        return new VarDecl(VarType.PARAM, typeDecl, Collections.singletonList(parameterName));
     }
 
     public static SubroutineDecl SubroutineDecl(SubroutineType subroutineType, TypeDecl returnType, String subroutineName, List<VarDecl> parameterDecls, List<VarDecl> varDecls, List<Statement> statements){
@@ -114,8 +114,8 @@ public class TreeMaker {
         return new NewClass(className, args);
     }
 
-    public static NewArray NewArray(String typeName, Expression size){
-        return new NewArray(typeName, size);
+    public static NewArray NewArray(TypeDecl type, Expression size){
+        return new NewArray(type, size);
     }
 
     public static Unary Unary(Op op, Expression term){

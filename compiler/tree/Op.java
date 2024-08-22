@@ -1,5 +1,10 @@
 package tree;
 
+import token.Token;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public enum Op {
 
     // unary
@@ -31,6 +36,9 @@ public enum Op {
     BOOLAND("&&", "and"),
     BOOLOR("||", "or"),
 
+
+    NULL(""),
+
     ;
 
     public String name;
@@ -43,5 +51,24 @@ public enum Op {
     Op(String name, String cmd){
         this.name = name;
         this.cmd = cmd;
+    }
+
+    public static Map<Op, Integer> opPriority = new HashMap<>();
+
+    static {
+        opPriority.put(Op.BOOLOR, 1);
+        opPriority.put(Op.BOOLAND, 2);
+        opPriority.put(Op.OR, 3);
+        opPriority.put(Op.AND, 4);
+        opPriority.put(Op.EQ, 5);
+        opPriority.put(Op.NOTEQ, 5);
+        opPriority.put(Op.GT, 6);
+        opPriority.put(Op.GTEQ, 6);
+        opPriority.put(Op.LT, 6);
+        opPriority.put(Op.LTEQ, 6);
+        opPriority.put(Op.PLUS, 7);
+        opPriority.put(Op.SUB, 7);
+        opPriority.put(Op.MUL, 8);
+        opPriority.put(Op.DIV, 8);
     }
 }

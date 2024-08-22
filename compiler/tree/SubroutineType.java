@@ -2,7 +2,8 @@ package tree;
 
 public enum SubroutineType {
 
-    CONSTRUCTOR("constructor"),FUNCTION("function"),METHOD("method");
+    FUNCTION("function"),
+    METHOD("method");
 
     public String name;
 

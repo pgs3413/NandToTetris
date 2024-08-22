@@ -1,5 +1,6 @@
 package tree;
 
+import token.Token;
 import xml.ListNode;
 import xml.Node;
 import xml.ValueNode;
@@ -206,11 +207,11 @@ public abstract class Expression implements Tree {
     }
 
     public static class NewArray extends Expression{
-        public String typeName;
+        public TypeDecl type;
         public Expression size;
 
-        public NewArray(String typeName, Expression size){
-            this.typeName = typeName;
+        public NewArray(TypeDecl type, Expression size){
+            this.type = type;
             this.size = size;
         }
 
@@ -222,7 +223,7 @@ public abstract class Expression implements Tree {
         @Override
         public Node toXml() {
             List<Node> nodeList = new ArrayList<>();
-            nodeList.add(ValueNode.of("typeName", typeName));
+            nodeList.add(ValueNode.of("typeName", type.name));
             nodeList.add(ListNode.of("size", Collections.singletonList(size.toXml())));
             return ListNode.of("newArray", nodeList);
         }

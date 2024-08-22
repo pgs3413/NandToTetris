@@ -102,7 +102,7 @@ class Math {
             return 0;
         }
 
-        if((y <= 0){
+        if(y <= 0){
             return 0;
         }
 
@@ -194,7 +194,7 @@ class Math {
     /** Returns the greater number. */
     function int max(int a, int b) {
 
-        if((a >= b){
+        if(a >= b){
             return a;
         }
 
@@ -204,7 +204,7 @@ class Math {
     /** Returns the smaller number. */
     function int min(int a, int b) {
 
-        if((a <= b){
+        if(a <= b){
             return a;
         }
 

@@ -1,5 +1,7 @@
 package token;
 
+import tree.Op;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +28,7 @@ public enum Token {
     ELSE("else", Type.K),
     WHILE("while", Type.K),
     RETURN("return", Type.K),
+    NEW("new", Type.K),
 
     //symbol
     LBRACE("{", Type.S),
@@ -38,36 +41,37 @@ public enum Token {
     COMMA(",", Type.S),
     SEMI(";", Type.S),
 
-    PLUS("+", Type.S),
-    SUB("-", Type.S),
-    STAR("*", Type.S),
-    SLASH("/", Type.S),
-    AMP("&", Type.S),
-    BAR("|", Type.S),
+    PLUS("+", Type.S, Op.PLUS),
+    SUB("-", Type.S, Op.SUB),
+    STAR("*", Type.S, Op.MUL),
+    SLASH("/", Type.S, Op.DIV),
+    AMP("&", Type.S, Op.AND),
+    BAR("|", Type.S, Op.OR),
     TILDE("~", Type.S),
 
-    LT("<", Type.S),
-    GT(">", Type.S),
-    LTEQ("<=", Type.S),
-    GTEQ(">=", Type.S),
-    EQEQ("==", Type.S),
-    BANGEQ("!=", Type.S),
+    LT("<", Type.S, Op.LT),
+    GT(">", Type.S, Op.GT),
+    LTEQ("<=", Type.S, Op.LTEQ),
+    GTEQ(">=", Type.S, Op.GTEQ),
+    EQEQ("==", Type.S, Op.EQ),
+    BANGEQ("!=", Type.S, Op.NOTEQ),
 
-    AMPAMP("&&", Type.S),
-    BARBAR("||", Type.S),
+    AMPAMP("&&", Type.S, Op.BOOLAND),
+    BARBAR("||", Type.S, Op.BOOLOR),
     BANG("!", Type.S),
 
     EQ("=", Type.S),
 
-    INTCONSTANT("整型常量",Type.IC),
-    STRINGCONSTANT("字符串常量",Type.SC),
-    IDENTIFIER("非关键字标识符" ,Type.I),
+    INTCONSTANT("整型常量"),
+    STRINGCONSTANT("字符串常量"),
+    IDENTIFIER("非关键字标识符"),
 
     EOF("文件结束"),
     ;
 
     public final String name;
     public final Type type;
+    public final Op op;
 
     public static final Map<String, Token> SYMBOL_MAP = new HashMap<>();
     public static final Map<String, Token> KEYWORD_MAP = new HashMap<>();
@@ -79,21 +83,22 @@ public enum Token {
         }
     }
 
-    Token(){
-        this(null, null);
-    }
-
     Token(String name){
-        this(name, null);
+        this(name, null, null);
     }
 
     Token(String name, Type type){
+        this(name, type, null);
+    }
+
+    Token(String name, Type type, Op op){
         this.name = name;
         this.type = type;
+        this.op = op;
     }
 
     public enum Type {
-        K("keyword"),S("symbol"),I("identifier"),SC("stringConstant"),IC("integerConstant");
+        K("keyword"),S("symbol");
 
         public String name;
 

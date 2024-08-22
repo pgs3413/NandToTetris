@@ -25,7 +25,7 @@ public class XmlUtils {
 
         Path source = Paths.get("jack/test/os/Math.jack");
         Path target = Paths.get("jack/test/os/Math.xml");
-        tokenizing(source, target);
+        parse(source, target);
 
     }
 

@@ -44,7 +44,6 @@ public class MemberEnter extends Visitor {
         switch (typeDecl.typeKind){
             case INT: type = Type.intType; break;
             case BOOL: type = Type.boolType; break;
-            case CHAR: type = Type.charType;break;
             case VOID: type = Type.voidType;break;
             default:
                 String className = typeDecl.name;
@@ -102,9 +101,9 @@ public class MemberEnter extends Visitor {
         if(that.subroutineType == SubroutineType.METHOD){
             thisSymbol();
         }
-        for(ParameterDecl tree: that.parameterDecls){
-            tree.accept(this);
-        }
+//        for(ParameterDecl tree: that.parameterDecls){
+//            tree.accept(this);
+//        }
         for(VarDecl tree: that.varDecls){
             tree.accept(this);
         }
@@ -125,19 +124,19 @@ public class MemberEnter extends Visitor {
         params.add(varSymbol);
         scope.table.put("this", varSymbol);
     }
-
-    @Override
-    public void visitParameterDecl(ParameterDecl that) {
-        VarSymbol varSymbol = new VarSymbol();
-        varSymbol.name = that.parameterName;
-        varSymbol.varType = VarType.PARAM;
-        varSymbol.type = getType(that.typeDecl);
-        varSymbol.index = paramIndex++;
-        if(scope.table.containsKey(that.parameterName)){
-            Utils.exit(symbol.tree.fileName +
-                    ": subroutine " + scope.sym.name + ": duplicated filed name "+ that.parameterName);
-        }
-        params.add(varSymbol);
-        scope.table.put(that.parameterName, varSymbol);
-    }
+//
+//    @Override
+//    public void visitParameterDecl(ParameterDecl that) {
+//        VarSymbol varSymbol = new VarSymbol();
+//        varSymbol.name = that.parameterName;
+//        varSymbol.varType = VarType.PARAM;
+//        varSymbol.type = getType(that.typeDecl);
+//        varSymbol.index = paramIndex++;
+//        if(scope.table.containsKey(that.parameterName)){
+//            Utils.exit(symbol.tree.fileName +
+//                    ": subroutine " + scope.sym.name + ": duplicated filed name "+ that.parameterName);
+//        }
+//        params.add(varSymbol);
+//        scope.table.put(that.parameterName, varSymbol);
+//    }
 }

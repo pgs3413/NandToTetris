@@ -42,7 +42,7 @@ public class TypeDecl implements Tree{
         }else {
             s = name;
         }
-        return ValueNode.of("type", name);
+        return ValueNode.of("type", s);
     }
 
 }

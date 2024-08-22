@@ -7,10 +7,7 @@ import utils.Utils;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static token.Token.*;
@@ -27,6 +24,7 @@ public class Parser {
 
     private final Scanner s;
     private boolean existReturn;
+    private boolean isArrayAccess;
 
     public Parser(Path source) throws IOException {
         s = new Scanner(source);
@@ -37,10 +35,10 @@ public class Parser {
         accept(CLASS);
         String className = accept(IDENTIFIER);
         if(!s.className().equals(className)){
-            Utils.exit(s.fileName(), s.line(), s.linePos() - s.name().length(), "文件名与类名不一致");
+            exit("文件名与类名不一致");
         }
         accept(LBRACE);
-        List<VarDecl> varDecls = parseClassVar();
+        List<VarDecl> varDecls = parseVarDecls(true);
         List<SubroutineDecl> subroutineDecls = parseSubroutines();
         accept(RBRACE);
         accept(EOF);
@@ -52,19 +50,30 @@ public class Parser {
     TypeDecl parseType(List<Token> tokens){
         Token lastToken = s.token();
         String typeName = accept(tokens);
-        TypeDecl typeDecl;
-        if(lastToken == INT) typeDecl = IntType();
-//        else if(lastToken == CHAR) typeDecl = CharType();
-        else if(lastToken == BOOLEAN) typeDecl = BoolType();
-        else if(lastToken == VOID) typeDecl = VoidType();
-        else typeDecl = ClassType(typeName);
-        return typeDecl;
+        if(s.token() == LBRACKET){
+            accept(LBRACKET);
+            accept(RBRACKET);
+            switch (lastToken){
+                case INT: return IntArrayType();
+                case BOOLEAN: return BoolArrayType();
+                case IDENTIFIER: return ArrayType(typeName);
+                default:
+                    exit("dont support void array");
+            }
+        }
+        switch (lastToken){
+            case INT: return IntType();
+            case BOOLEAN: return BoolType();
+            case VOID: return VoidType();
+            default: return ClassType(typeName);
+        }
     }
 
-    List<VarDecl> parseClassVar(){
+    List<VarDecl> parseVarDecls(boolean isClassVar){
         List<VarDecl> varDecls = new ArrayList<>();
-        while (s.token() == STATIC || s.token() == FIELD){
-            VarType varType = s.token() == STATIC ? VarType.STATIC : VarType.FIELD;
+        List<Token> varToken = isClassVar ? Arrays.asList(STATIC, FIELD): Collections.singletonList(VAR);
+        while (varToken.contains(s.token())){
+            VarType varType = s.token() == STATIC ? VarType.STATIC : s.token() == FIELD ? VarType.FIELD: VarType.VAR;
             s.nextToken();
             TypeDecl typeDecl = parseType(Arrays.asList(INT, BOOLEAN, IDENTIFIER));
             String varName = accept(IDENTIFIER);
@@ -84,43 +93,38 @@ public class Parser {
         List<SubroutineDecl> subroutineDecls = new ArrayList<>();
         while (s.token() == CONSTRUCTOR || s.token() == FUNCTION || s.token() == METHOD){
             existReturn = false;
-            SubroutineType subroutineType = s.token() == CONSTRUCTOR ? SubroutineType.CONSTRUCTOR :
-                    s.token() == FUNCTION ? SubroutineType.FUNCTION : SubroutineType.METHOD;
-            s.nextToken();
+            SubroutineType subroutineType = s.token() == FUNCTION ? SubroutineType.FUNCTION : SubroutineType.METHOD;
             TypeDecl typeDecl;
-           if(subroutineType != SubroutineType.CONSTRUCTOR){
-               typeDecl  = parseType(Arrays.asList(INT, BOOLEAN, VOID, IDENTIFIER));
+            String subroutineName;
+           if(s.token() == CONSTRUCTOR){
+              typeDecl = VoidType();
+              subroutineName = CONSTRUCTOR.name;
+              s.nextToken();
            }else {
-               typeDecl = ClassType(s.className());
+               s.nextToken();
+               typeDecl = parseType(Arrays.asList(INT, BOOLEAN, VOID, IDENTIFIER));
+               subroutineName = accept(IDENTIFIER);
            }
-            String subroutineName = accept(IDENTIFIER);
             accept(LPAREN);
-            List<ParameterDecl> parameterDecls = parseParameter();
+            List<VarDecl> parameterDecls = parseParameter();
             accept(RPAREN);
             accept(LBRACE);
-            List<VarDecl> varDecls = parseSubroutineVar();
+            List<VarDecl> varDecls = parseVarDecls(false);
             List<Statement> statements = parseStatements();
             accept(RBRACE);
             if(!existReturn){
-                ReturnStatement returnStatement;
-                if(subroutineType != SubroutineType.CONSTRUCTOR){
-                    if (typeDecl != TypeDecl.voidType){
-                        Utils.exit(s.fileName() + ": subroutine " + subroutineName
-                                + ": lack of return statement");
-                    }
-                    returnStatement = ReturnStatement(null);
-                }else {
-                    returnStatement = ReturnStatement(KeyWordConstant(KeyWord.THIS));
+                if (typeDecl != TypeDecl.voidType){
+                    Utils.exit(s.fileName() + ": subroutine " + subroutineName + ": lack of return statement");
                 }
-                statements.add(returnStatement);
+                statements.add(ReturnStatement(null));
             }
             subroutineDecls.add(SubroutineDecl(subroutineType, typeDecl, subroutineName, parameterDecls, varDecls, statements));
         }
         return subroutineDecls;
     }
 
-    List<ParameterDecl> parseParameter(){
-        List<ParameterDecl> parameterDecls = new ArrayList<>();
+    List<VarDecl> parseParameter(){
+        List<VarDecl> parameterDecls = new ArrayList<>();
         TypeDecl typeDecl;
         String parameterName;
         if (s.token() != RPAREN){
@@ -137,23 +141,6 @@ public class Parser {
         return parameterDecls;
     }
 
-    List<VarDecl> parseSubroutineVar(){
-        List<VarDecl> varDecls = new ArrayList<>();
-        while (s.token() == VAR){
-            s.nextToken();
-            TypeDecl typeDecl = parseType(Arrays.asList(INT, BOOLEAN, IDENTIFIER));
-            String varName = accept(IDENTIFIER);
-            List<String> varNames = new ArrayList<>();
-            varNames.add(varName);
-            while (s.token() == COMMA){
-                s.nextToken();
-                varNames.add(accept(IDENTIFIER));
-            }
-            accept(SEMI);
-            varDecls.add(VarDecl(VarType.VAR, typeDecl, varNames));
-        }
-        return varDecls;
-    }
 
     List<Statement> parseStatements(){
         List<Token> tokens = Arrays.asList(LET, DO, IF, WHILE, RETURN);
@@ -172,7 +159,7 @@ public class Parser {
 
     LetStatement parseLet(){
         accept(LET);
-        Identifier varName = parseIdentifier();
+        Expression varName = parseIdentifier();
         accept(EQ);
         Expression init = parseExpression();
         accept(SEMI);
@@ -194,9 +181,9 @@ public class Parser {
         accept(LBRACE);
         List<Statement> thenPart = parseStatements();
         accept(RBRACE);
-        List<Statement> elsePart = null;
+        List<Statement> elsePart = new ArrayList<>();
         if(s.token() == ELSE){
-            accept(ELSE);
+            s.nextToken();
             accept(LBRACE);
             elsePart = parseStatements();
             accept(RBRACE);
@@ -219,7 +206,7 @@ public class Parser {
         existReturn = true;
         accept(RETURN);
         if(s.token() == SEMI){
-            accept(SEMI);
+            s.nextToken();
             return ReturnStatement(null);
         }
         Expression value = parseExpression();
@@ -227,24 +214,35 @@ public class Parser {
         return ReturnStatement(value);
     }
 
-    Identifier parseIdentifier(){
-        String name = accept(IDENTIFIER);
-        if(s.token() == DOT){
-            accept(DOT);
+    Expression parseIdentifier(){
+        Token lastToken = s.token();
+        String name = accept(Arrays.asList(IDENTIFIER, THIS));
+        Expression expr;
+        if(lastToken == THIS) expr = KeyWordConstant(KeyWord.THIS);
+        else expr = Identifier(name);
+        while (s.token() == DOT){
+            s.nextToken();
             String fieldName = accept(IDENTIFIER);
-            return FieldAccess(fieldName, Identifier(name));
+            expr = FieldAccess(fieldName, expr);
         }
+        isArrayAccess = false;
         if(s.token() == LBRACKET){
-            accept(LBRACKET);
+            s.nextToken();
             Expression index = parseExpression();
             accept(RBRACKET);
-            return ArrayAccess(name, index);
+            isArrayAccess = true;
+            return ArrayAccess(expr, index);
         }
-        return Identifier(name);
+        return expr;
     }
 
     SubroutineCall parseSubroutineCall(){
-        Identifier subroutineName = parseIdentifier();
+        Expression subroutineName = parseIdentifier();
+        if(isArrayAccess) exit("cant call array subroutine");
+        return SubroutineCall(subroutineName, parseArgs());
+    }
+
+    List<Expression> parseArgs(){
         accept(LPAREN);
         List<Expression> args = new ArrayList<>();
         if(s.token() != RPAREN){
@@ -255,34 +253,37 @@ public class Parser {
             }
         }
         accept(RPAREN);
-        return SubroutineCall(subroutineName, args);
+        return args;
     }
 
     Expression parseExpression(){
-        Term term1 = parseTerm();
-        if(Arrays.asList(PLUS, SUB, STAR, SLASH, LT, GT, EQ).contains(s.token())){
-            Token lastToken = s.token();
+        Expression expr = parseTerm();
+        if(s.token().op == null) return expr;
+        Deque<Expression> exprStack = new ArrayDeque<>();
+        Deque<Op> opStack = new ArrayDeque<>();
+        exprStack.addLast(expr);
+        opStack.addLast(Op.NULL);
+        while (s.token().op != null){
+            Op topOp = s.token().op;
             s.nextToken();
-            Term term2 = parseTerm();
-            Op op;
-            switch (lastToken){
-                case PLUS: op = Op.PLUS;break;
-                case SUB: op = Op.SUB;break;
-                case STAR: op = Op.STAR;break;
-                case SLASH: op = Op.SLASH;break;
-//                case AND: op = Op.AND;break;
-//                case OR: op = Op.OR;break;
-                case LT: op = Op.LT;break;
-                case GT: op = Op.GT;break;
-                case EQ: op = Op.EQ;break;
-                default: op = Op.NOT;
+            Expression topExpr = parseTerm();
+            opStack.addLast(topOp);
+            exprStack.addLast(topExpr);
+            while (topOp != Op.NULL &&
+                    (s.token().op == null || Op.opPriority.get(topOp) >= Op.opPriority.get(s.token().op))
+                ){
+                topOp = opStack.pollLast();
+                Expression expr2 = exprStack.pollLast();
+                Expression expr1 = exprStack.pollLast();
+                expr = Binary(topOp, expr1, expr2);
+                exprStack.addLast(expr);
+                topOp = opStack.getLast();
             }
-            return Binary(op, term1, term2);
         }
-        return term1;
+        return expr;
     }
 
-    Term parseTerm(){
+    Expression parseTerm(){
         switch (s.token()){
             case INTCONSTANT:
                 String number = accept(INTCONSTANT);
@@ -299,38 +300,46 @@ public class Parser {
             case NULL:
                 s.nextToken();
                 return KeyWordConstant(KeyWord.NULL);
-            case THIS:
-                s.nextToken();
-                return KeyWordConstant(KeyWord.THIS);
             case LPAREN:
-                accept(LPAREN);
+                s.nextToken();
                 Expression expr = parseExpression();
                 accept(RPAREN);
                 return Parens(expr);
-            case SUB:
-                Op op = s.token() == SUB ? Op.NEG : Op.NOT;
+            case SUB: case TILDE: case BANG:
+                Op op = s.token() == SUB ? Op.NEG : s.token() == TILDE ? Op.NOT : Op.BOOLNOT;
                 s.nextToken();
-                Term term = parseTerm();
+                Expression term = parseTerm();
                 return Unary(op, term);
-            case IDENTIFIER:
-                Identifier identifier = parseIdentifier();
-                if(s.token() == LPAREN){
-                    accept(LPAREN);
-                    List<Expression> args = new ArrayList<>();
-                    if(s.token() != RPAREN){
-                        args.add(parseExpression());
-                        while (s.token() == COMMA){
-                            s.nextToken();
-                            args.add(parseExpression());
-                        }
-                    }
-                    accept(RPAREN);
-                    return SubroutineCall(identifier, args);
+            case NEW:
+                s.nextToken();
+                Token lastToken = s.token();
+                String typeName = accept(Arrays.asList(INT, BOOLEAN, IDENTIFIER));
+                switch (s.token()){
+                    case LBRACKET:
+                        s.nextToken();
+                        Expression size = parseExpression();
+                        accept(RBRACKET);
+                        if(lastToken == INT) return NewArray(IntType(), size);
+                        else if(lastToken == BOOLEAN) return NewArray(BoolType(), size);
+                        else return NewArray(ClassType(typeName), size);
+                    case LPAREN:
+                        if(lastToken != IDENTIFIER) expectedError(Collections.singletonList(IDENTIFIER));
+                        List<Expression> newArgs = parseArgs();
+                        return NewClass(typeName, newArgs);
+                    default:
+                        expectedError(Arrays.asList(LBRACKET, LBRACKET));
                 }
-                return identifier;
+            case THIS:
+            case IDENTIFIER:
+                Expression expr2 = parseIdentifier();
+                if(s.token() == LPAREN){
+                    if(isArrayAccess) exit("cant call array subroutine");
+                    return SubroutineCall(expr2, parseArgs());
+                }
+                return expr2;
             default:
                 expectedError(Arrays.asList(INTCONSTANT, STRINGCONSTANT,
-                        TRUE, FALSE, NULL, THIS, LPAREN, SUB, IDENTIFIER));
+                        TRUE, FALSE, NULL, LPAREN, SUB, TILDE, BANG, NEW, THIS, IDENTIFIER));
                 return null;
         }
     }
@@ -357,6 +366,10 @@ public class Parser {
         Utils.exit(s.fileName(), s.line(), s.linePos() - s.name().length(), "expected " +
                 tokens.stream().map(token -> token.name).collect(Collectors.joining("|"))
                 );
+    }
+
+    void exit(String msg){
+        Utils.exit(s.fileName(), s.line(), s.linePos() - s.name().length(), msg);
     }
 
 }
