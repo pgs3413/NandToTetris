@@ -1,7 +1,6 @@
 package sym;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author: pangs
@@ -10,14 +9,31 @@ import java.util.Map;
  */
 public class Scope {
 
-    public Map<String, Symbol> table;
-    public Scope next;
-    public Symbol sym;
+    private final Map<String, Symbol> table = new HashMap<>();
+    public Symbol symbol;
 
-    public Scope(Scope next, Symbol symbol){
-        table = new HashMap<>();
-        this.next = next;
-        this.sym = symbol;
+    public Scope(Symbol symbol){
+        this.symbol = symbol;
+    }
+
+    public Symbol get(String name, Runnable f){
+        Symbol symbol = table.get(name);
+        if(symbol == null){
+            f.run();
+            return null;
+        }
+        return symbol;
+    }
+
+    public void put(String name, Symbol symbol, Runnable f){
+        if(table.containsKey(name)){
+            f.run();
+        }
+        table.put(name, symbol);
+    }
+
+    public Collection<Symbol> allSymbols(){
+        return table.values();
     }
 
 }

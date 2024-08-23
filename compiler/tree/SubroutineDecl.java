@@ -1,6 +1,6 @@
 package tree;
 
-import sym.SubroutineSymbol;
+import sym.Symbol;
 import xml.ListNode;
 import xml.Node;
 import xml.ValueNode;
@@ -21,7 +21,7 @@ public class SubroutineDecl implements Tree{
     public List<VarDecl> parameterDecls;
     public List<VarDecl> varDecls;
     public List<Statement> statements;
-    public SubroutineSymbol sym;
+    public Symbol.SubroutineSymbol sym;
 
     public SubroutineDecl(SubroutineType subroutineType, TypeDecl returnType, String subroutineName, List<VarDecl> parameterDecls, List<VarDecl> varDecls, List<Statement> statements) {
         this.subroutineType = subroutineType;

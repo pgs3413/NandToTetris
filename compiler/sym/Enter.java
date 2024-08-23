@@ -2,10 +2,11 @@ package sym;
 
 import tree.ClassDecl;
 import tree.Tree;
-import tree.TypeKind;
 import tree.Visitor;
 import utils.Utils;
 
+import static sym.Symbol.*;
+import static sym.Type.*;
 
 /**
  * @Author: pangs
@@ -14,10 +15,10 @@ import utils.Utils;
  */
 public class Enter extends Visitor {
 
-    Scope scope;
+    Scope rootScope;
 
-    public Enter(Scope scope){
-        this.scope = scope;
+    public Enter(Scope rootScope){
+        this.rootScope = rootScope;
     }
 
     public void classEnter(Tree tree){
@@ -26,14 +27,11 @@ public class Enter extends Visitor {
 
     @Override
     public void visitClassDecl(ClassDecl that) {
-       if(scope.table.containsKey(that.className)){
-           Utils.exit("类名重复: " + that.className);
-       }
        ClassSymbol classSymbol = new ClassSymbol();
        classSymbol.name = that.className;
-       classSymbol.scope = new Scope(scope, classSymbol);
+       classSymbol.scope = new Scope(classSymbol);
        classSymbol.tree = that;
-       classSymbol.type = new Type(TypeKind.CLASS, classSymbol);
-       scope.table.put(that.className, classSymbol);
+       classSymbol.type = new ClassType(classSymbol);
+       rootScope.put(that.className, classSymbol, () -> Utils.exit("class name duplicate: " + that.className));
     }
 }

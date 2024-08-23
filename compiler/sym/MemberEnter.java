@@ -5,6 +5,11 @@ import utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+
+import static sym.Symbol.*;
+import static sym.Type.*;
 
 /**
  * @Author: pangs
@@ -15,9 +20,11 @@ public class MemberEnter extends Visitor {
 
     Scope rootScope;
     Scope scope;
-    ClassSymbol symbol;
+
+    ClassSymbol classSymbol;
     int fieldIndex;
     int staticIndex;
+
     int paramIndex;
     int varIndex;
     List<VarSymbol> params;
@@ -26,9 +33,9 @@ public class MemberEnter extends Visitor {
         this.rootScope = rootScope;
     }
 
-    public void memberEnter(ClassSymbol classSymbol){
-        symbol = classSymbol;
-        scope = classSymbol.scope;
+    public void enter(ClassSymbol classSymbol){
+        this.classSymbol = classSymbol;
+        this.scope = classSymbol.scope;
         fieldIndex = 0;
         staticIndex = 0;
         for(VarDecl tree: classSymbol.tree.varDecls){
@@ -40,78 +47,93 @@ public class MemberEnter extends Visitor {
     }
 
     private Type getType(TypeDecl typeDecl){
-        Type type;
+        Type type = null;
+        String name = typeDecl.name;
         switch (typeDecl.typeKind){
             case INT: type = Type.intType; break;
             case BOOL: type = Type.boolType; break;
-            case VOID: type = Type.voidType;break;
-            default:
-                String className = typeDecl.name;
-                ClassSymbol targetSymbol = (ClassSymbol)rootScope.table.get(className);
-                if(targetSymbol == null){
-                    Utils.exit(symbol.tree.fileName + ": cannot find class " + className);
-                }
-                assert targetSymbol != null;
+            case VOID: type = Type.voidType; break;
+            case CLASS:
+                ClassSymbol targetSymbol = (ClassSymbol)rootScope.get(name,
+                        () -> Utils.exit(classSymbol.tree.fileName + ": cannot find class " + name));
                 type = targetSymbol.type;
+                break;
+            case Array:
+                ClassSymbol itemSymbol = (ClassSymbol)rootScope.get(name,
+                        () -> Utils.exit(classSymbol.tree.fileName + ": cannot find class " + name));
+                type = ((ClassType)itemSymbol.type).arrayType;
+                break;
         }
         return type;
     }
 
     @Override
     public void visitVarDecl(VarDecl that) {
+
         Type type = getType(that.typeDecl);
+
         for (String varName: that.varNames){
             VarSymbol varSymbol = new VarSymbol();
             varSymbol.name = varName;
             varSymbol.varType = that.varType;
             varSymbol.type = type;
-            boolean isVar = false;
+            AtomicBoolean isVar = new AtomicBoolean(false);
             switch (that.varType){
                 case STATIC: varSymbol.index = staticIndex++; break;
                 case FIELD: varSymbol.index = fieldIndex++; break;
-                case VAR: varSymbol.index = varIndex++; isVar = true; break;
-                default: Utils.exit(symbol.tree.fileName + ": wrong var type " + that.varType.name);
+                case VAR:
+                    varSymbol.index = varIndex++;
+                    isVar.set(true);
+                    break;
+                case PARAM:
+                    varSymbol.index = paramIndex++;
+                    isVar.set(true);
+                    params.add(varSymbol);
+                    break;
             }
-            if(scope.table.containsKey(varName)){
-                String s ;
-                if(isVar){
-                    s = symbol.tree.fileName + ": subroutine " + scope.sym.name;
-                }else {
-                    s = symbol.tree.fileName;
-                }
-                Utils.exit(s + ": duplicated filed name " + varName);
-            }
-            scope.table.put(varName, varSymbol);
+            scope.put(varName, varSymbol, () -> {
+                if(isVar.get())
+                    Utils.exit(classSymbol.tree.fileName + ": " + "subroutine " + scope.symbol.name + ": duplicated variable name: " + varName);
+                else
+                    Utils.exit(classSymbol.tree.fileName + ": duplicated member: " + varName);
+            });
         }
     }
 
+
+
     @Override
     public void visitSubroutineDecl(SubroutineDecl that) {
+
         SubroutineSymbol subroutineSymbol = new SubroutineSymbol();
         subroutineSymbol.subroutineType = that.subroutineType;
         subroutineSymbol.name = that.subroutineName;
-        subroutineSymbol.returnType = getType(that.returnType);
-        subroutineSymbol.scope = new Scope(scope, subroutineSymbol);
+        subroutineSymbol.type = getType(that.returnType);
+        subroutineSymbol.scope = new Scope(subroutineSymbol);
         subroutineSymbol.params = new ArrayList<>();
+
         params = subroutineSymbol.params;
         paramIndex = 0;
         varIndex = 0;
         Scope temp = scope;
         scope = subroutineSymbol.scope;
+
         if(that.subroutineType == SubroutineType.METHOD){
             thisSymbol();
         }
-//        for(ParameterDecl tree: that.parameterDecls){
-//            tree.accept(this);
-//        }
+
+        for(VarDecl tree: that.parameterDecls){
+            tree.accept(this);
+        }
+
         for(VarDecl tree: that.varDecls){
             tree.accept(this);
         }
+
         scope = temp;
-        if(scope.table.containsKey(that.subroutineName)){
-            Utils.exit(symbol.tree.fileName + ": duplicated filed name " + that.subroutineName);
-        }
-        scope.table.put(that.subroutineName, subroutineSymbol);
+        scope.put(that.subroutineName, subroutineSymbol,
+                () -> Utils.exit(classSymbol.tree.fileName + ": duplicated member: " + that.subroutineName));
+
         that.sym = subroutineSymbol;
     }
 
@@ -119,24 +141,10 @@ public class MemberEnter extends Visitor {
         VarSymbol varSymbol = new VarSymbol();
         varSymbol.name = "this";
         varSymbol.varType = VarType.PARAM;
-        varSymbol.type = symbol.type;
+        varSymbol.type = classSymbol.type;
         varSymbol.index = paramIndex++;
         params.add(varSymbol);
-        scope.table.put("this", varSymbol);
+        scope.put("this", varSymbol, () -> {});
     }
-//
-//    @Override
-//    public void visitParameterDecl(ParameterDecl that) {
-//        VarSymbol varSymbol = new VarSymbol();
-//        varSymbol.name = that.parameterName;
-//        varSymbol.varType = VarType.PARAM;
-//        varSymbol.type = getType(that.typeDecl);
-//        varSymbol.index = paramIndex++;
-//        if(scope.table.containsKey(that.parameterName)){
-//            Utils.exit(symbol.tree.fileName +
-//                    ": subroutine " + scope.sym.name + ": duplicated filed name "+ that.parameterName);
-//        }
-//        params.add(varSymbol);
-//        scope.table.put(that.parameterName, varSymbol);
-//    }
+
 }

@@ -10,20 +10,44 @@ import tree.TypeKind;
 public class Type {
 
     public static Type intType = new Type(TypeKind.INT);
-//    public static Type charType = new Type(TypeKind.CHAR);
     public static Type boolType = new Type(TypeKind.BOOL);
     public static Type voidType = new Type(TypeKind.VOID);
 
-    public Symbol sym;
     public TypeKind typeKind;
 
     public Type(TypeKind typeKind){
         this.typeKind = typeKind;
     }
 
-    public Type(TypeKind typeKind, Symbol symbol){
-        this.typeKind = typeKind;
-        this.sym = symbol;
+
+    public static class ClassType extends Type {
+
+        public Symbol.ClassSymbol symbol;
+        public ArrayType arrayType;
+
+        public ClassType(Symbol.ClassSymbol symbol){
+            super(TypeKind.CLASS);
+            this.symbol = symbol;
+            arrayType = new ArrayType(this);
+        }
+
     }
+
+    public static class ArrayType extends Type {
+
+
+        public static ArrayType intArrayType = new ArrayType(intType);
+        public static ArrayType boolArrayType = new ArrayType(boolType);
+
+        public Type itemType;
+
+        public ArrayType(Type itemType){
+            super(TypeKind.Array);
+            this.itemType = itemType;
+        }
+
+    }
+
+
 }
 
