@@ -1,0 +1,13 @@
+class Test {
+
+    field int a;
+
+    constructor(int b){
+        let a = b;
+    }
+
+    method int test(){
+        return a;
+    }
+
+}

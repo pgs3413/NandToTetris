@@ -1,7 +1,0 @@
-function Hello.test 0
-push constant 1
-push constant 2
-eq
-pop argument 0
-push constant 0
-return

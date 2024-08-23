@@ -1,0 +1,17 @@
+class Main {
+
+    function void main(){
+
+        var Test a;
+
+        // let a = new Test(2);
+        let a = Memory.alloc(1);
+        do a.constructor2(2);
+
+        do Output.printInt(a.test());
+
+        return;
+
+    }
+
+}

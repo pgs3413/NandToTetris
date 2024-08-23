@@ -1,8 +1,0 @@
-class Hello {
-
-    function void test(char a){
-        let a = 1 = 2;
-        return;
-    }
-
-}

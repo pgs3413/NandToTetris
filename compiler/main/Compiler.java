@@ -40,11 +40,11 @@ public class Compiler {
             memberEnter.enter((Symbol.ClassSymbol) symbol);
         }
 
-//        //VM code generate
-//        Coder coder = new Coder(targetPath, rootScope);
-//        for(Symbol symbol: rootScope.table.values()){
-//            coder.gen((ClassSymbol) symbol);
-//        }
+        //VM code generate
+        Coder coder = new Coder(targetPath, rootScope);
+        for(Symbol symbol: rootScope.allSymbols()){
+            coder.gen((Symbol.ClassSymbol) symbol);
+        }
 
     }
 

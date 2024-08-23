@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,21 +23,24 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-       String s = "./jack/hello";
+//       String s = "./jack/hello";
+//
+//        Path path = Paths.get(s);
+//        File file = path.toFile();
+//        if(!file.isDirectory()){
+//            Utils.exit(s + " is not a directory");
+//        }
+//        File[] files = file.listFiles(((dir, name) -> name.endsWith(".jack")));
+//        if(files == null || files.length == 0){
+//            Utils.exit(s + " has no jack file");
+//        }
+//        assert files != null;
+//        List<Path> jackFiles = Arrays.stream(files).map(File::toPath).collect(Collectors.toList());
 
-        Path path = Paths.get(s);
-        File file = path.toFile();
-        if(!file.isDirectory()){
-            Utils.exit(s + " is not a directory");
-        }
-        File[] files = file.listFiles(((dir, name) -> name.endsWith(".jack")));
-        if(files == null || files.length == 0){
-            Utils.exit(s + " has no jack file");
-        }
-        assert files != null;
-        List<Path> jackFiles = Arrays.stream(files).map(File::toPath).collect(Collectors.toList());
+        Path path = Paths.get("jack/hello/Test.jack");
+        Path target = Paths.get("jack/hello");
 
-        Compiler compiler = new Compiler(jackFiles, path);
+        Compiler compiler = new Compiler(Collections.singletonList(path), target);
         compiler.compile();
 
         System.out.println("compile successfully!");

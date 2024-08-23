@@ -36,4 +36,8 @@ public class Scope {
         return table.values();
     }
 
+    public int size(){
+        return table.size();
+    }
+
 }

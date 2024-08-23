@@ -1,0 +1,12 @@
+function Test.constructor 0
+push argument 0
+pop pointer 0
+push argument 1
+pop this 0
+push constant 0
+return
+function Test.test 0
+push argument 0
+pop pointer 0
+push this 0
+return

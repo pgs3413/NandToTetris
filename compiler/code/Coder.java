@@ -13,14 +13,17 @@ import java.util.List;
 
 import static tree.Statement.*;
 import static tree.Expression.*;
+import static sym.Symbol.*;
+import static sym.Type.*;
 
 public class Coder extends Visitor {
 
     Path targetPath;
     Scope rootScope;
-    ClassSymbol classSymbol;
-    SubroutineSymbol symbol;
+
     List<String> vms;
+    ClassSymbol classSymbol;
+    SubroutineSymbol subroutineSymbol;
     Type resultType;
     boolean isFunction;
 
@@ -35,90 +38,68 @@ public class Coder extends Visitor {
         for(SubroutineDecl tree: classSymbol.tree.subroutineDecls){
             tree.accept(this);
         }
-        Path targetFile = Paths.get(targetPath.toString(), classSymbol.name + ".vmt");
+        Path targetFile = Paths.get(targetPath.toString(), classSymbol.name + ".vm");
         Files.write(targetFile, vms);
     }
-//
-//    @Override
-//    public void visitSubroutineDecl(SubroutineDecl that) {
-//        symbol = that.sym;
-//        String functionTitle = "function " + classSymbol.name + "." + symbol.name + " "
-//                + (symbol.scope.table.size() - symbol.params.size());
-//        vms.add(functionTitle);
-//        isFunction = false;
-//        switch (symbol.subroutineType){
-//            case FUNCTION:
-//                isFunction = true;
-//                break;
-//            case METHOD:
-//                vms.add("push argument 0");
-//                vms.add("pop pointer 0");
-//                break;
-//            case CONSTRUCTOR:
-//                long fieldCnt = classSymbol.scope.table.values().stream().
-//                        filter(sym -> sym instanceof VarSymbol && ((VarSymbol)sym).varType == VarType.FIELD).count();
-//                vms.add("push constant " + fieldCnt);
-//                vms.add("call Memory.alloc 1");
-//                vms.add("pop pointer 0");
-//                break;
-//        }
-//
-//        for(Statement tree: that.statements){
-//            tree.accept(this);
-//        }
-//    }
-//
-//    /** visit statement */
-//
-//    @Override
-//    public void visitLetStatement(LetStatement that) {
-//        that.init.accept(this);
-//        VarSymbol varSymbol = getVarSymbol(that.varName.name);
-//        if(resultType.typeKind == TypeKind.CLASS && varSymbol.type.typeKind == TypeKind.CLASS
-//                && varSymbol.type != resultType){
-//            exit("let statement type not match " + that.varName.name);
-//        }
-//        String segment = varSymbol.varType.segment;
-//        if(that.varName instanceof ArrayAccess){
-//            ArrayAccess aa = (ArrayAccess) that.varName;
-//            aa.index.accept(this);
-//            if(resultType != Type.intType){
-//                exit("array index must be integer");
-//            }
-//            vms.add("push " + segment + " " + varSymbol.index);
-//            vms.add("add");
-//            vms.add("pop pointer 1");
-//            vms.add("pop that 0");
-//        }else {
-//            vms.add("pop " + segment + " " + varSymbol.index);
-//        }
-//    }
-//
-//    @Override
-//    public void visitReturnStatement(ReturnStatement that) {
-//        if(that.value == null){
-//            if(symbol.returnType != Type.voidType){
-//                exit("return type not match");
-//            }
-//            vms.add("push constant 0");
-//        }else {
-//            that.value.accept(this);
-//            if(resultType.typeKind == TypeKind.CLASS && symbol.returnType.typeKind == TypeKind.CLASS
-//                    && symbol.returnType != resultType){
-//                exit("return type not match");
-//            }
-//        }
-//        vms.add("return");
-//    }
-//
-//
-//    /** visit expression */
-//
-//    @Override
-//    public void visitIntegerConstant(IntegerConstant that) {
-//        vms.add("push constant " + that.value.toString());
-//        resultType = Type.intType;
-//    }
+
+    @Override
+    public void visitSubroutineDecl(SubroutineDecl that) {
+        subroutineSymbol = that.sym;
+        String functionTitle = "function " + classSymbol.name + "." + subroutineSymbol.name + " "
+                + (subroutineSymbol.scope.size() - subroutineSymbol.params.size());
+        vms.add(functionTitle);
+        isFunction = false;
+        switch (subroutineSymbol.subroutineType){
+            case FUNCTION:
+                isFunction = true;
+                break;
+            case METHOD:
+                vms.add("push argument 0");
+                vms.add("pop pointer 0");
+                break;
+        }
+
+        for(Statement tree: that.statements){
+            tree.accept(this);
+        }
+    }
+
+    /** visit statement */
+
+    @Override
+    public void visitLetStatement(LetStatement that) {
+
+        that.init.accept(this);
+
+        if(that.varName instanceof Identifier){
+            Identifier target = (Identifier) that.varName;
+            VarSymbol varSymbol = getVarSymbol(target.name);
+            checkType(varSymbol.type, resultType, "let statement");
+            vms.add("pop " + varSymbol.varType.segment + " " + varSymbol.index);
+        }else {  //TODO ArrayAccess FieldAccess
+            exit("let statement target wrong");
+        }
+    }
+
+    @Override
+    public void visitReturnStatement(ReturnStatement that) {
+        if(that.value == null){
+            checkType(subroutineSymbol.type, voidType, "return statement");
+            vms.add("push constant 0");
+        }else {
+            that.value.accept(this);
+            checkType(subroutineSymbol.type, resultType, "return statement");
+        }
+        vms.add("return");
+    }
+
+    /** visit expression */
+
+    @Override
+    public void visitIntegerConstant(IntegerConstant that) {
+        vms.add("push constant " + that.value.toString());
+        resultType = Type.intType;
+    }
 //
 //    @Override
 //    public void visitKeyWordConstant(KeyWordConstant that) {
@@ -133,14 +114,14 @@ public class Coder extends Visitor {
 //           case NULL: Utils.exit("TODO");
 //       }
 //    }
-//
-//    @Override
-//    public void visitIdentifier(Identifier that) {
-//        VarSymbol varSymbol = getVarSymbol(that.name);
-//        vms.add("push " + varSymbol.varType.segment + " " + varSymbol.index);
-//        resultType = varSymbol.type;
-//    }
-//
+
+    @Override
+    public void visitIdentifier(Identifier that) {
+        VarSymbol varSymbol = getVarSymbol(that.name);
+        vms.add("push " + varSymbol.varType.segment + " " + varSymbol.index);
+        resultType = varSymbol.type;
+    }
+
 //    @Override
 //    public void visitArrayAccess(ArrayAccess that) {
 //        VarSymbol varSymbol = getVarSymbol(that.name);
@@ -237,33 +218,30 @@ public class Coder extends Visitor {
 //            vms.add(that.op.cmd);
 //        }
 //    }
-//
-//    /** others */
-//
-//    private VarSymbol getVarSymbol(String name){
-//        VarSymbol varSymbol = (VarSymbol) symbol.scope.table.get(name);
-//        if(varSymbol == null){
-//            Symbol nextSymbol = classSymbol.scope.table.get(name);
-//            if(nextSymbol instanceof VarSymbol){
-//                VarSymbol nextVarSymbol = (VarSymbol) nextSymbol;
-//                if(nextVarSymbol.varType == VarType.STATIC || !isFunction){
-//                    varSymbol = nextVarSymbol;
-//                }
-//            }
-//        }
-//        if(varSymbol == null){
-//            exit("undefined identifier " + name);
-//        }
-//        return varSymbol;
-//    }
-//
-//    private void checkCast(Type target, Type source, String msg){
-////        if(target == Type.intType){
-////            if(source == Type.)
-////        }
-//    }
-//
-//    private void exit(String msg){
-//        Utils.exit(classSymbol.tree.fileName +": subroutine " + symbol.name + ": " + msg);
-//    }
+
+    /** others */
+
+    private VarSymbol getVarSymbol(String name){
+        VarSymbol varSymbol = (VarSymbol) subroutineSymbol.scope.get(name, () -> {});
+        if(varSymbol == null){
+            Symbol nextSymbol = classSymbol.scope.get(name, () -> {});
+            if(nextSymbol instanceof VarSymbol &&
+                    (!isFunction || ((VarSymbol) nextSymbol).varType == VarType.STATIC)){
+               varSymbol = (VarSymbol) nextSymbol;
+            }
+        }
+        if(varSymbol == null){
+            exit("undefined identifier " + name);
+        }
+        return varSymbol;
+    }
+
+
+    private void checkType(Type target, Type source, String msg){
+        if(target != source) exit(msg + " type not match");
+    }
+
+    private void exit(String msg){
+        Utils.exit(classSymbol.tree.fileName +": subroutine " + subroutineSymbol.name + ": " + msg);
+    }
 }
