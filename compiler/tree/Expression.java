@@ -182,7 +182,7 @@ public abstract class Expression implements Tree {
 
     public static class NewClass extends Expression{
         public String className;
-        List<Expression> args;
+        public List<Expression> args;
 
         public NewClass(String className, List<Expression> args){
             this.className = className;

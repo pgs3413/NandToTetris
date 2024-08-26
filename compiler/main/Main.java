@@ -37,10 +37,13 @@ public class Main {
 //        assert files != null;
 //        List<Path> jackFiles = Arrays.stream(files).map(File::toPath).collect(Collectors.toList());
 
-        Path path = Paths.get("jack/hello/Test.jack");
+        List<Path> paths = Arrays.asList(
+                Paths.get("jack/hello/Test.jack"),
+                Paths.get("jack/hello/Person.jack")
+        );
         Path target = Paths.get("jack/hello");
 
-        Compiler compiler = new Compiler(Collections.singletonList(path), target);
+        Compiler compiler = new Compiler(paths, target);
         compiler.compile();
 
         System.out.println("compile successfully!");

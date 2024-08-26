@@ -1,0 +1,9 @@
+class Person {
+
+    field int age;
+
+    constructor(int age){
+        let this.age = age;
+    }
+
+}

@@ -26,10 +26,10 @@ public enum Op {
     // int op int -> bool
     LT("<", "lt"),
     GT(">", "gt"),
-    LTEQ("<="),
-    GTEQ(">="),
+    LTEQ("<=", "gt"),
+    GTEQ(">=", "lt"),
     // x op x -> bool (x : int boolean sameclass array)
-    NOTEQ("!="),
+    NOTEQ("!=", "eq"),
     EQ("==", "eq"),
 
     // bool op bool -> bool

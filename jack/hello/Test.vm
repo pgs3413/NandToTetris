@@ -1,12 +1,17 @@
-function Test.constructor 0
-push argument 0
-pop pointer 0
-push argument 1
-pop this 0
+function Test.init 0
+push constant 1
+call Memory.alloc 1
+pop temp 0
+push temp 0
+push constant 18
+call Person.constructor 2
+pop temp 1
+push temp 0
+pop static 0
 push constant 0
 return
-function Test.test 0
-push argument 0
-pop pointer 0
-push this 0
+function Test.get 0
+push static 0
+pop pointer 1
+push that 0
 return

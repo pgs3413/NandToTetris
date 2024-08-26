@@ -59,6 +59,14 @@ public class MemberEnter extends Visitor {
                 type = targetSymbol.type;
                 break;
             case Array:
+                if(typeDecl == TypeDecl.intArrayType){
+                    type = ArrayType.intArrayType;
+                    break;
+                }
+                if(typeDecl == TypeDecl.boolArrayType){
+                    type = ArrayType.boolArrayType;
+                    break;
+                }
                 ClassSymbol itemSymbol = (ClassSymbol)rootScope.get(name,
                         () -> Utils.exit(classSymbol.tree.fileName + ": cannot find class " + name));
                 type = ((ClassType)itemSymbol.type).arrayType;
@@ -138,13 +146,7 @@ public class MemberEnter extends Visitor {
     }
 
     private void thisSymbol(){
-        VarSymbol varSymbol = new VarSymbol();
-        varSymbol.name = "this";
-        varSymbol.varType = VarType.PARAM;
-        varSymbol.type = classSymbol.type;
-        varSymbol.index = paramIndex++;
-        params.add(varSymbol);
-        scope.put("this", varSymbol, () -> {});
+        paramIndex++;
     }
 
 }

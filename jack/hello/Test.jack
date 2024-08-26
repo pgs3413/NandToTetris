@@ -1,13 +1,13 @@
 class Test {
 
-    field int a;
+    static Person p;
 
-    constructor(int b){
-        let a = b;
+    function void init(){
+        let p = new Person(18);
     }
 
-    method int test(){
-        return a;
+    function int get(){
+        return p.age;
     }
 
 }
