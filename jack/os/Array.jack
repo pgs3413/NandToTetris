@@ -1,0 +1,17 @@
+class Array {
+
+    field int[] array;
+
+    constructor(int size){
+        let array = new int[size];
+    }
+
+    method int get(int index){
+        return array[index];
+    }
+
+    method void set(int index, int value){
+        let array[index] = value;
+    }
+
+}
