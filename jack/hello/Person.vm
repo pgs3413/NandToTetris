@@ -7,3 +7,24 @@ pop pointer 1
 pop that 0
 push constant 0
 return
+function Person.init 0
+push argument 0
+pop pointer 0
+push constant 2
+call Memory.alloc 1
+pop temp 0
+push temp 0
+push this 0
+push constant 2
+add
+call Person.constructor 2
+pop temp 1
+push temp 0
+pop this 1
+push constant 0
+return
+function Person.get 0
+push argument 0
+pop pointer 0
+push this 0
+return

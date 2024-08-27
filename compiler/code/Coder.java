@@ -73,7 +73,7 @@ public class Coder extends Visitor {
 
         if(that.varName instanceof Identifier){
             Identifier target = (Identifier) that.varName;
-            VarSymbol varSymbol = getVarSymbol(target.name);
+            VarSymbol varSymbol = getVarSymbol(target.name, true);
             checkType(varSymbol.type, resultType, "let statement");
             vms.add("pop " + varSymbol.varType.segment + " " + varSymbol.index);
         } else if(that.varName instanceof ArrayAccess) {
@@ -115,6 +115,12 @@ public class Coder extends Visitor {
         vms.add("return");
     }
 
+    @Override
+    public void visitDoStatement(DoStatement that) {
+        that.subroutineCall.accept(this);
+        vms.add("pop temp 1");
+    }
+
     /** visit expression */
 
     @Override
@@ -146,7 +152,7 @@ public class Coder extends Visitor {
 
     @Override
     public void visitIdentifier(Identifier that) {
-        VarSymbol varSymbol = getVarSymbol(that.name);
+        VarSymbol varSymbol = getVarSymbol(that.name, true);
         vms.add("push " + varSymbol.varType.segment + " " + varSymbol.index);
         resultType = varSymbol.type;
     }
@@ -198,22 +204,22 @@ public class Coder extends Visitor {
         Type type2 = resultType;
         switch (that.op){
             case PLUS: case SUB: case AND: case OR:
-                checkType(intType, type1, type2, that.op.name + "must int op int");
+                checkType(intType, type1, type2, that.op.name + " must int op int");
                 resultType = intType;
                 vms.add(that.op.cmd);
                 break;
             case MUL: case DIV:
-                checkType(intType, type1, type2, that.op.name + "must int op int");
+                checkType(intType, type1, type2, that.op.name + " must int op int");
                 resultType = intType;
                 vms.add("call " + that.op.cmd + " 2");
                 break;
             case LT: case GT:
-                checkType(intType, type1, type2, that.op.name + "must int op int");
+                checkType(intType, type1, type2, that.op.name + " must int op int");
                 resultType = boolType;
                 vms.add(that.op.cmd);
                 break;
             case LTEQ: case GTEQ:
-                checkType(intType, type1, type2, that.op.name + "must int op int");
+                checkType(intType, type1, type2, that.op.name + " must int op int");
                 resultType = boolType;
                 vms.add(that.op.cmd);
                 vms.add("not");
@@ -230,7 +236,7 @@ public class Coder extends Visitor {
                 vms.add("not");
                 break;
             case BOOLAND: case BOOLOR:
-                checkType(boolType, type1, type2, that.op.name + "must bool op bool");
+                checkType(boolType, type1, type2, that.op.name + " must bool op bool");
                 resultType = boolType;
                 vms.add(that.op.cmd);
                 break;
@@ -281,6 +287,57 @@ public class Coder extends Visitor {
         resultType = classSymbol.type;
     }
 
+    @Override
+    public void visitSubroutineCall(SubroutineCall that) {
+        if(that.subroutineName == KeyWordConstant.THIS)
+            exit("can not call this()");
+        else if(that.subroutineName instanceof Identifier){
+
+            String name = ((Identifier)that.subroutineName).name;
+            SubroutineSymbol symbol = getSubroutineSymbol(name, classSymbol);
+            if(isFunction && symbol.subroutineType == SubroutineType.METHOD) exit("can not call method in function");
+            int extra = 0;
+            name = classSymbol.name + "." + name;
+            if(symbol.subroutineType == SubroutineType.METHOD){
+                vms.add("push pointer 0");
+                extra = 1;
+            }
+            visitArgs(symbol.params, that.args, name);
+            vms.add("call " + name + " " + (symbol.params.size() + extra));
+            resultType = symbol.type;
+
+        }
+        else if(that.subroutineName instanceof FieldAccess){
+            FieldAccess fa = (FieldAccess) that.subroutineName;
+
+            if(fa.own instanceof Identifier &&
+                    getVarSymbol(((Identifier)fa.own).name, false) == null
+            ){
+                String name = ((Identifier)fa.own).name;
+                ClassSymbol classSymbol = getClassSymbol(name);
+                SubroutineSymbol symbol = getSubroutineSymbol(fa.name, classSymbol);
+                name = name + "." + fa.name;
+                if(symbol.subroutineType != SubroutineType.FUNCTION)
+                    exit(name + " is not function");
+                visitArgs(symbol.params, that.args, name);
+                vms.add("call " + name + " " + symbol.params.size());
+                resultType = symbol.type;
+            }else {
+                fa.own.accept(this);
+                if(resultType.typeKind != TypeKind.CLASS) exit("only class type has method member");
+                ClassSymbol classSymbol = ((ClassType) resultType).symbol;
+                SubroutineSymbol symbol = getSubroutineSymbol(fa.name, classSymbol);
+                String name = classSymbol.name + "." + fa.name;
+                if(symbol.subroutineType != SubroutineType.METHOD) exit(name + " is not method");
+                visitArgs(symbol.params, that.args, name);
+                vms.add("call " + name + " " + (symbol.params.size() + 1));
+                resultType = symbol.type;
+            }
+
+        }
+        else exit("unexpected system error");
+    }
+
     private void visitArgs(List<VarSymbol> varSymbols, List<Expression> args, String subroutineName){
         if(varSymbols.size() != args.size()) exit("call " +  subroutineName + " wrong: args size not match");
         int size = varSymbols.size();
@@ -292,7 +349,7 @@ public class Coder extends Visitor {
 
     /** others */
 
-    private VarSymbol getVarSymbol(String name){
+    private VarSymbol getVarSymbol(String name, boolean force){
         VarSymbol varSymbol = (VarSymbol) subroutineSymbol.scope.get(name, () -> {});
         if(varSymbol == null){
             Symbol nextSymbol = classSymbol.scope.get(name, () -> {});
@@ -301,7 +358,7 @@ public class Coder extends Visitor {
                varSymbol = (VarSymbol) nextSymbol;
             }
         }
-        if(varSymbol == null){
+        if(force && varSymbol == null){
             exit("undefined identifier " + name);
         }
         return varSymbol;
@@ -316,16 +373,24 @@ public class Coder extends Visitor {
         return (VarSymbol) symbol;
     }
 
+    private SubroutineSymbol getSubroutineSymbol(String name, ClassSymbol classSymbol){
+        Symbol symbol = classSymbol.scope.get(name,
+                () -> exit("there is not subroutine " + name + " in class " + classSymbol.name));
+        if(!(symbol instanceof SubroutineSymbol)) exit(name + " is not subroutine");
+        assert symbol instanceof SubroutineSymbol;
+        return (SubroutineSymbol) symbol;
+    }
+
     private ClassSymbol getClassSymbol(String name){
         return (ClassSymbol) rootScope.get(name, () -> exit("can not find class " + name));
     }
 
     private void checkType(Type target, Type source, String msg){
-        if(target != source) exit(msg + " :type not match");
+        if(target != source) exit(msg + ": type not match");
     }
 
     private void checkType(Type target, Type source1, Type source2,  String msg){
-        if(target != source1 || target != source2) exit(msg + " :type not match");
+        if(target != source1 || target != source2) exit(msg + ": type not match");
     }
 
     private void exit(String msg){

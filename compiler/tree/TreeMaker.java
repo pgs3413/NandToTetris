@@ -87,7 +87,13 @@ public class TreeMaker {
     }
 
     public static KeyWordConstant KeyWordConstant(KeyWord value){
-        return new KeyWordConstant(value);
+        switch (value){
+            case NULL: return KeyWordConstant.NULL;
+            case THIS: return KeyWordConstant.THIS;
+            case TRUE: return KeyWordConstant.TRUE;
+            case FALSE: return KeyWordConstant.FALSE;
+            default: return null;
+        }
     }
 
     public static Identifier Identifier(String name){

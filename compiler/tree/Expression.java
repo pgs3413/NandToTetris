@@ -54,6 +54,12 @@ public abstract class Expression implements Tree {
     }
 
     public static class KeyWordConstant extends Expression {
+
+        public static KeyWordConstant TRUE = new KeyWordConstant(KeyWord.TRUE);
+        public static KeyWordConstant FALSE = new KeyWordConstant(KeyWord.FALSE);
+        public static KeyWordConstant THIS = new KeyWordConstant(KeyWord.THIS);
+        public static KeyWordConstant NULL = new KeyWordConstant(KeyWord.NULL);
+
         public KeyWord value;
 
         public KeyWordConstant(KeyWord value) {

@@ -4,10 +4,11 @@ class Test {
 
     function void init(){
         let p = new Person(18);
+        do p.init();
     }
 
     function int get(){
-        return p.age;
+        return p.other.get();
     }
 
 }

@@ -1,9 +1,18 @@
 class Person {
 
     field int age;
+    field Person other;
 
     constructor(int age){
         let this.age = age;
+    }
+
+    method void init(){
+        let other = new Person(age + 2);
+    }
+
+    method int get(){
+        return age;
     }
 
 }
