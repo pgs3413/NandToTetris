@@ -4,13 +4,13 @@
  */
 class Math {
 
-    static Array twoToThe;
-    static Array divideStack;
+    static int[] twoToThe;
+    static int[] divideStack;
 
     /** Initializes the library. */
     function void init() {
 
-        let twoToThe = Array.new(16);
+        let twoToThe = new int[16];
         let twoToThe[0] = 1;
         let twoToThe[1] = 2;
         let twoToThe[2] = 4;
@@ -28,10 +28,7 @@ class Math {
         let twoToThe[14] = 16384;
         let twoToThe[15] = 32767 + 1;
 
-        let divideStack = Array.new(16);
-
-        return;
-
+        let divideStack = new int[16];
     }
 
     function boolean bit(int x, int j){
@@ -40,7 +37,7 @@ class Math {
 
         let a = twoToThe[j];
         let b = x & a;
-        if(b = 0){
+        if(b == 0){
             return false;
         }else {
             return true;
@@ -51,11 +48,7 @@ class Math {
     /** Returns the absolute value of x. */
     function int abs(int x) {
 
-        if(x = 0){
-            return 0;
-        }
-
-        if(x > 0){
+        if(x >= 0){
             return x;
         }
 
@@ -105,15 +98,7 @@ class Math {
             let y = -y;
         }
 
-        if(x < 0){
-            return 0;
-        }
-
-        if((y = 0) | (y < 0)){
-            return 0;
-        }
-
-        if(y > x){
+        if(x <= 0 || y <= 0 || y > x){
             return 0;
         }
 
@@ -124,7 +109,6 @@ class Math {
         }else {
             return -result;
         }
-
 
     }
 
@@ -139,7 +123,7 @@ class Math {
         let q = 0;
         let l = y;
 
-        while((l > 0) & (~(l > x))){
+        while(l > 0 && l <= x){
             let divideStack[q] = l;
             let l = l + l;
             let q = q + 1;
@@ -150,10 +134,10 @@ class Math {
         let l = divideStack[q];
         let q = q - 1;
 
-        while(q > (-1)){
+        while(q > -1){
             let result = result + result;
             let rest = x - l;
-            if(~(rest < divideStack[q])){
+            if(rest >= divideStack[q]){
                 let result = result + 1;
                 let l = l + divideStack[q];
             }
@@ -169,25 +153,21 @@ class Math {
 
         var int i, t, tt, y;
 
-        if(x = 0){
-            return 0;
-        }
-
-        if(x = 1){
-            return 1;
+        if(x == 0 || x == 1){
+            return x;
         }
 
         let i = 7;
         let y = 0;
 
-        while(~(i < 0)){
+        while(i >= 0){
             let t = y + twoToThe[i];
             if(t < x){
                 let tt = Math.multiply(t, t);
-                if(tt = x){
+                if(tt == x){
                     return t;
                 }
-                if((tt > 0) & (tt < x)){
+                if(tt > 0 && tt < x){
                     let y = t;
                 }
             }
@@ -206,7 +186,7 @@ class Math {
     /** Returns the greater number. */
     function int max(int a, int b) {
 
-        if((a > b) | (a = b)){
+        if(a >= b){
             return a;
         }
 
@@ -216,11 +196,11 @@ class Math {
     /** Returns the smaller number. */
     function int min(int a, int b) {
 
-        if((a < b) | (a = b)){
+        if(a <= b){
             return a;
         }
 
         return b;
-
     }
+
 }

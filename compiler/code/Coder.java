@@ -149,6 +149,7 @@ public class Coder extends Visitor {
         String while_conn = "WHILE_CONN_" + while_index;
         String while_body = "WHILE_BODY_" + while_index;
         String while_end = "WHILE_END_" + while_index;
+        while_index++;
         vms.add("label " + while_conn);
         that.condition.accept(this);
         checkType(boolType, resultType, "while condition is not a bool");

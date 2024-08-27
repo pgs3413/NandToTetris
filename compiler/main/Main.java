@@ -23,27 +23,24 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-//       String s = "./jack/hello";
-//
-//        Path path = Paths.get(s);
-//        File file = path.toFile();
-//        if(!file.isDirectory()){
-//            Utils.exit(s + " is not a directory");
-//        }
-//        File[] files = file.listFiles(((dir, name) -> name.endsWith(".jack")));
-//        if(files == null || files.length == 0){
-//            Utils.exit(s + " has no jack file");
-//        }
-//        assert files != null;
-//        List<Path> jackFiles = Arrays.stream(files).map(File::toPath).collect(Collectors.toList());
+        String s = "./jack/os";
 
-        List<Path> paths = Arrays.asList(
-                Paths.get("jack/hello/Test.jack"),
-                Paths.get("jack/hello/Person.jack")
-        );
-        Path target = Paths.get("jack/hello");
+        Path path = Paths.get(s);
+        File file = path.toFile();
+        if(!file.isDirectory()){
+            Utils.exit(s + " is not a directory");
+        }
 
-        Compiler compiler = new Compiler(paths, target);
+        File[] files = file.listFiles(((dir, name) -> name.endsWith(".jack")));
+        if(files == null || files.length == 0){
+            Utils.exit(s + " has no jack file");
+        }
+
+        assert files != null;
+        List<Path> jackFiles = Arrays.stream(files).map(File::toPath).collect(Collectors.toList());
+
+
+        Compiler compiler = new Compiler(jackFiles, path);
         compiler.compile();
 
         System.out.println("compile successfully!");
