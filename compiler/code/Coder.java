@@ -426,6 +426,7 @@ public class Coder extends Visitor {
     }
 
     private void checkType(Type target, Type source, String msg){
+        if(target == ArrayType.intArrayType && source == intType) return;
         if(target != source) exit(msg + ": type not match");
     }
 

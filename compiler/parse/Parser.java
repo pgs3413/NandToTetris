@@ -103,7 +103,7 @@ public class Parser {
            }else {
                s.nextToken();
                typeDecl = parseType(Arrays.asList(INT, BOOLEAN, VOID, IDENTIFIER));
-               subroutineName = accept(IDENTIFIER);
+               subroutineName = accept(Arrays.asList(IDENTIFIER, NEW));
            }
             accept(LPAREN);
             List<VarDecl> parameterDecls = parseParameter();
