@@ -27,6 +27,9 @@ public class Coder extends Visitor {
     Type resultType;
     boolean isFunction;
 
+    int if_index;
+    int while_index;
+
     public Coder(Path targetPath, Scope rootScope){
         this.targetPath = targetPath;
         this.rootScope = rootScope;
@@ -49,6 +52,8 @@ public class Coder extends Visitor {
                 + (subroutineSymbol.scope.size() - subroutineSymbol.params.size());
         vms.add(functionTitle);
         isFunction = false;
+        if_index = 0;
+        while_index = 0;
         switch (subroutineSymbol.subroutineType){
             case FUNCTION:
                 isFunction = true;
@@ -119,6 +124,40 @@ public class Coder extends Visitor {
     public void visitDoStatement(DoStatement that) {
         that.subroutineCall.accept(this);
         vms.add("pop temp 1");
+    }
+
+    @Override
+    public void visitIfStatement(IfStatement that) {
+        String if_true = "IF_TRUE_" + if_index;
+        String if_false = "IF_FALSE_" + if_index;
+        String if_end = "IF_END_" + if_index;
+        if_index++;
+        that.condition.accept(this);
+        checkType(boolType, resultType, "if condition is not a bool");
+        vms.add("if-goto " + if_true);
+        vms.add("goto " + if_false);
+        vms.add("label " + if_true);
+        for(Statement tree: that.thenPart) tree.accept(this);
+        vms.add("goto " + if_end);
+        vms.add("label " + if_false);
+        for (Statement tree: that.elsePart) tree.accept(this);
+        vms.add("label " + if_end);
+    }
+
+    @Override
+    public void visitWhileStatement(WhileStatement that) {
+        String while_conn = "WHILE_CONN_" + while_index;
+        String while_body = "WHILE_BODY_" + while_index;
+        String while_end = "WHILE_END_" + while_index;
+        vms.add("label " + while_conn);
+        that.condition.accept(this);
+        checkType(boolType, resultType, "while condition is not a bool");
+        vms.add("if-goto " + while_body);
+        vms.add("goto " + while_end);
+        vms.add("label " + while_body);
+        for(Statement tree: that.body) tree.accept(this);
+        vms.add("goto " + while_conn);
+        vms.add("label " + while_end);
     }
 
     /** visit expression */

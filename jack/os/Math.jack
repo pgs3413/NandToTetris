@@ -98,15 +98,7 @@ class Math {
             let y = -y;
         }
 
-        if(x < 0){
-            return 0;
-        }
-
-        if(y <= 0){
-            return 0;
-        }
-
-        if(y > x){
+        if(x <= 0 || y <= 0 || y > x){
             return 0;
         }
 

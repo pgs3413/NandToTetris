@@ -1,8 +1,0 @@
-class Test {
-
-    function void test(){
-        var int a;
-        let a = 1 + 2 * 3 - 1;
-    }
-
-}
