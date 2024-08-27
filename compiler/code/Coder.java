@@ -191,6 +191,18 @@ public class Coder extends Visitor {
     }
 
     @Override
+    public void visitStringConstant(StringConstant that) {
+        int length = that.value.length();
+        vms.add("push constant " + length);
+        vms.add("call String.new 1");
+        for (int i = 0; i < length; i++){
+            vms.add("push constant " + (int)that.value.charAt(i));
+            vms.add("call String.appendChar 2");
+        }
+        resultType = getClassSymbol("String").type;
+    }
+
+    @Override
     public void visitIdentifier(Identifier that) {
         VarSymbol varSymbol = getVarSymbol(that.name, true);
         vms.add("push " + varSymbol.varType.segment + " " + varSymbol.index);
@@ -427,6 +439,7 @@ public class Coder extends Visitor {
 
     private void checkType(Type target, Type source, String msg){
         if(target == ArrayType.intArrayType && source == intType) return;
+        if(target == intType && source == ArrayType.intArrayType) return;
         if(target != source) exit(msg + ": type not match");
     }
 

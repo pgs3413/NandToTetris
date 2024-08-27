@@ -1,0 +1,134 @@
+function Keyboard.init 0
+push constant 24576
+pop static 0
+push constant 0
+return
+function Keyboard.keyPressed 0
+push constant 0
+push static 0
+add
+pop pointer 1
+push that 0
+return
+function Keyboard.readChar 2
+push constant 0
+pop local 1
+label WHILE_CONN_0
+push local 1
+push constant 0
+eq
+if-goto WHILE_BODY_0
+goto WHILE_END_0
+label WHILE_BODY_0
+call Keyboard.keyPressed 0
+pop local 1
+goto WHILE_CONN_0
+label WHILE_END_0
+push local 1
+pop local 0
+label WHILE_CONN_1
+push local 1
+push constant 0
+eq
+not
+if-goto WHILE_BODY_1
+goto WHILE_END_1
+label WHILE_BODY_1
+call Keyboard.keyPressed 0
+pop local 1
+goto WHILE_CONN_1
+label WHILE_END_1
+push local 0
+push constant 128
+eq
+if-goto IF_TRUE_0
+goto IF_FALSE_0
+label IF_TRUE_0
+call Output.println 0
+pop temp 1
+push local 0
+return
+goto IF_END_0
+label IF_FALSE_0
+label IF_END_0
+push local 0
+push constant 129
+eq
+if-goto IF_TRUE_1
+goto IF_FALSE_1
+label IF_TRUE_1
+call Output.backSpace 0
+pop temp 1
+push local 0
+return
+goto IF_END_1
+label IF_FALSE_1
+label IF_END_1
+push local 0
+call Output.printChar 1
+pop temp 1
+push local 0
+return
+function Keyboard.readLine 2
+push argument 0
+call Output.printString 1
+pop temp 1
+push constant 3
+call Memory.alloc 1
+pop temp 0
+push temp 0
+push constant 100
+call String.constructor 2
+pop temp 1
+push temp 0
+pop local 1
+push constant 0
+pop local 0
+label WHILE_CONN_0
+push constant 0
+not
+if-goto WHILE_BODY_0
+goto WHILE_END_0
+label WHILE_BODY_0
+call Keyboard.readChar 0
+pop local 0
+push local 0
+push constant 128
+eq
+if-goto IF_TRUE_0
+goto IF_FALSE_0
+label IF_TRUE_0
+push local 1
+return
+goto IF_END_0
+label IF_FALSE_0
+label IF_END_0
+push local 0
+push constant 129
+eq
+if-goto IF_TRUE_1
+goto IF_FALSE_1
+label IF_TRUE_1
+push local 1
+call String.eraseLastChar 1
+pop temp 1
+goto IF_END_1
+label IF_FALSE_1
+push local 1
+push local 0
+call String.appendChar 2
+pop temp 1
+label IF_END_1
+goto WHILE_CONN_0
+label WHILE_END_0
+push local 1
+return
+function Keyboard.readInt 2
+push argument 0
+call Keyboard.readLine 1
+pop local 0
+push local 0
+call String.intValue 1
+pop local 1
+push local 1
+return

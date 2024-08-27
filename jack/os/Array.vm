@@ -1,0 +1,28 @@
+function Array.constructor 0
+push argument 0
+pop pointer 0
+push argument 1
+call Memory.alloc 1
+pop this 0
+push constant 0
+return
+function Array.get 0
+push argument 0
+pop pointer 0
+push argument 1
+push this 0
+add
+pop pointer 1
+push that 0
+return
+function Array.set 0
+push argument 0
+pop pointer 0
+push argument 2
+push argument 1
+push this 0
+add
+pop pointer 1
+pop that 0
+push constant 0
+return

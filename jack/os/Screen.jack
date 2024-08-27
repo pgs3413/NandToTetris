@@ -17,7 +17,7 @@ class Screen {
     function void init() {
         let base = 16384;
         let color = 1;
-
+        
         let blackMap = new int[16];
         let blackMap[0] = 1;
         let blackMap[1] = 2;
@@ -35,7 +35,7 @@ class Screen {
         let blackMap[13] = 8192;
         let blackMap[14] = 16384;
         let blackMap[15] = 32767 + 1;
-
+        
         let whiteMap = new int[16];
         let whiteMap[0] = -1 - 1;
         let whiteMap[1] = -1 - 2;

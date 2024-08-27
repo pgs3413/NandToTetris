@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -23,22 +24,25 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        String s = "./jack/os";
-
-        Path path = Paths.get(s);
+        Path path = Paths.get(args[0]);
         File file = path.toFile();
         if(!file.isDirectory()){
-            Utils.exit(s + " is not a directory");
+            Utils.exit(args[0] + " is not a directory");
         }
 
         File[] files = file.listFiles(((dir, name) -> name.endsWith(".jack")));
         if(files == null || files.length == 0){
-            Utils.exit(s + " has no jack file");
+            Utils.exit(args[0] + " has no jack file");
         }
 
         assert files != null;
         List<Path> jackFiles = Arrays.stream(files).map(File::toPath).collect(Collectors.toList());
 
+        List<Path> osJackFiles = Arrays.stream(Objects.requireNonNull(Paths.get("./os").toFile().
+                listFiles(((dir, name) -> name.endsWith(".jack")))))
+                .map(File::toPath).collect(Collectors.toList());
+
+        jackFiles.addAll(osJackFiles);
 
         Compiler compiler = new Compiler(jackFiles, path);
         compiler.compile();
